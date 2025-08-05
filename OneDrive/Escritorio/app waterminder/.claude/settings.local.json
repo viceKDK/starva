@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx bmad-method install:*)",
+      "Bash(mkdir:*)",
+      "Bash(npm install)",
+      "Bash(npm install:*)",
+      "Bash(npx expo install:*)",
+      "Bash(npx expo start:*)",
+      "Bash(npm cache clean:*)",
+      "Bash(rmdir:*)",
+      "Bash(rm:*)",
+      "Bash(del package-lock.json)",
+      "Bash(mv:*)"
+    ],
+    "deny": []
+  }
+}
