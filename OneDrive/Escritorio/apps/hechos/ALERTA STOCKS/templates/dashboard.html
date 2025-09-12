@@ -1,0 +1,1292 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Price Monitor{% endblock %}
+
+{% block content %}
+<div class="modern-dashboard">
+    <!-- Enhanced Header -->
+    <div class="dashboard-header">
+        <div class="header-content">
+            <h1 class="dashboard-title">Price Alert Dashboard</h1>
+            <p class="dashboard-subtitle">Monitor your favorite stocks and cryptocurrencies with real-time alerts</p>
+        </div>
+        <div class="header-controls">
+            <button id="dark-mode-toggle" class="btn-icon" title="Toggle dark mode">
+                <span class="dark-mode-icon">🌙</span>
+            </button>
+            <button id="refresh-dashboard" class="btn btn-secondary">
+                <span class="refresh-icon">🔄</span>
+                Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- Cards Grid Layout -->
+    <div class="dashboard-grid">
+        <!-- Alerts Summary Card -->
+        <div class="dashboard-card alerts-summary-card">
+            <div class="card-header">
+                <div class="card-icon">⚠️</div>
+                <div class="card-title-group">
+                    <h3 class="card-title">Alerts Summary</h3>
+                    <p class="card-description">Current status of your alert system</p>
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-icon active">▶️</div>
+                        <div class="stat-info">
+                            <span class="stat-label">Active</span>
+                            <span class="stat-value" id="active-alerts">0</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon paused">⏸️</div>
+                        <div class="stat-info">
+                            <span class="stat-label">Paused</span>
+                            <span class="stat-value" id="paused-alerts">0</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon triggered">⚡</div>
+                        <div class="stat-info">
+                            <span class="stat-label">Triggered Today</span>
+                            <span class="stat-value" id="triggered-today">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Real-time Prices Card -->
+        <div class="dashboard-card prices-card">
+            <div class="card-header">
+                <div class="card-icon">💰</div>
+                <div class="card-title-group">
+                    <h3 class="card-title">Real-time Prices</h3>
+                    <p class="card-description">Current prices of monitored assets</p>
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="price-list" id="price-list">
+                    <div class="loading-state">Loading prices...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Notifications Card -->
+        <div class="dashboard-card notifications-card">
+            <div class="card-header">
+                <div class="card-icon">🔔</div>
+                <div class="card-title-group">
+                    <h3 class="card-title">Recent Activity</h3>
+                    <p class="card-description">Latest system notifications</p>
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="notification-list" id="notification-list">
+                    <div class="loading-state">Loading notifications...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Health Card -->
+        <div class="dashboard-card health-card">
+            <div class="card-header">
+                <div class="card-icon">❤️</div>
+                <div class="card-title-group">
+                    <h3 class="card-title">System Health</h3>
+                    <p class="card-description">Performance metrics</p>
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="health-metrics">
+                    <div class="health-item">
+                        <span class="health-label">Status</span>
+                        <span class="health-status" id="system-health-status">
+                            <span class="status-indicator healthy">●</span>
+                            <span class="status-text">Healthy</span>
+                        </span>
+                    </div>
+                    <div class="health-item">
+                        <span class="health-label">Uptime</span>
+                        <span class="health-value" id="system-uptime">99.9%</span>
+                    </div>
+                    <div class="health-item">
+                        <span class="health-label">Monitored Assets</span>
+                        <span class="health-value" id="monitored-count">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Controls -->
+    <div class="dashboard-card controls-card">
+        <div class="card-header">
+            <div class="card-icon">⚙️</div>
+            <div class="card-title-group">
+                <h3 class="card-title">System Controls</h3>
+                <p class="card-description">Monitor and control your alert system</p>
+            </div>
+        </div>
+        <div class="card-content">
+            <div class="controls-grid">
+                <div class="control-group">
+                    <div class="control-info">
+                        <span class="control-label">Monitoring Status</span>
+                        <span class="control-status" id="monitoring-status">Active</span>
+                    </div>
+                    <div class="control-actions">
+                        <button id="start-monitoring" class="btn btn-success btn-sm">Start</button>
+                        <button id="stop-monitoring" class="btn btn-danger btn-sm">Stop</button>
+                        <button id="check-now" class="btn btn-primary btn-sm">Check Now</button>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="control-info">
+                        <span class="control-label">Last Check</span>
+                        <span class="control-value" id="last-check">Never</span>
+                    </div>
+                    <div class="control-info">
+                        <span class="control-label">Next Check</span>
+                        <span class="control-value" id="next-check">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Creation Form -->
+    <div class="card">
+        <h3>Create New Price Alert</h3>
+        <form id="alert-form" class="alert-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="asset_symbol">Asset Symbol</label>
+                    <input 
+                        type="text" 
+                        id="asset_symbol" 
+                        name="asset_symbol" 
+                        placeholder="e.g., AAPL, bitcoin"
+                        required
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="asset_type">Asset Type</label>
+                    <select id="asset_type" name="asset_type" required>
+                        <option value="">Select type</option>
+                        <option value="stock">Stock</option>
+                        <option value="crypto">Crypto</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="condition_type">Condition</label>
+                    <select id="condition_type" name="condition_type" required>
+                        <option value="">Select condition</option>
+                        <option value=">=">&gt;= (Price above or equal)</option>
+                        <option value="<=">&lt;= (Price below or equal)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="threshold_price">Threshold Price ($)</label>
+                    <input 
+                        type="number" 
+                        id="threshold_price" 
+                        name="threshold_price" 
+                        step="0.01" 
+                        min="0"
+                        placeholder="e.g., 150.00"
+                        required
+                    >
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Create Alert</button>
+        </form>
+    </div>
+
+    <!-- Alerts Table -->
+    <div class="card">
+        <div class="card-header">
+            <h3>Your Price Alerts</h3>
+            <div class="bulk-actions" id="bulk-actions" style="display: none;">
+                <button class="btn btn-sm btn-secondary" onclick="toggleSelectedAlerts()">
+                    Toggle Selected
+                </button>
+                <button class="btn btn-sm btn-error" onclick="deleteSelectedAlerts()">
+                    Delete Selected
+                </button>
+                <button class="btn btn-sm btn-secondary" onclick="clearSelection()">
+                    Clear Selection
+                </button>
+            </div>
+        </div>
+        <div class="table-container">
+            <table class="alerts-table" id="alerts-table">
+                <thead>
+                    <tr>
+                        <th>
+                            <input type="checkbox" id="select-all" onchange="toggleSelectAll()">
+                        </th>
+                        <th>Asset</th>
+                        <th>Type</th>
+                        <th>Condition</th>
+                        <th>Threshold</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="alerts-tbody">
+                    <!-- Alerts will be populated here -->
+                    <tr class="empty-state">
+                        <td colspan="8" class="text-center">
+                            No alerts configured yet. Create your first alert above!
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Advanced Alerts: Creation -->
+    <div class="card">
+        <h3>Create Advanced Alert</h3>
+        <form id="adv-alert-form" class="alert-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="adv_asset_symbol">Asset Symbol</label>
+                    <input type="text" id="adv_asset_symbol" name="asset_symbol" placeholder="e.g., AAPL, bitcoin" required>
+                </div>
+                <div class="form-group">
+                    <label for="adv_asset_type">Asset Type</label>
+                    <select id="adv_asset_type" name="asset_type" required>
+                        <option value="">Select type</option>
+                        <option value="stock">Stock</option>
+                        <option value="crypto">Crypto</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="adv_alert_type">Alert Type</label>
+                    <select id="adv_alert_type" name="alert_type" required>
+                        <option value="percentage_change">Percentage Change</option>
+                        <option value="technical_indicator">Technical Indicator</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="adv_timeframe">Timeframe</label>
+                    <select id="adv_timeframe" name="timeframe">
+                        <option value="1d" selected>1d</option>
+                        <option value="1h">1h</option>
+                        <option value="4h">4h</option>
+                        <option value="1w">1w</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Conditions dynamic -->
+            <div id="adv-conditions">
+                <!-- Start with percentage change defaults -->
+                <div class="form-row adv-cond adv-pct">
+                    <div class="form-group">
+                        <label>Change %</label>
+                        <input type="number" id="pct_change" step="0.01" placeholder="e.g., 5" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Direction</label>
+                        <select id="pct_direction">
+                            <option value="any">Any</option>
+                            <option value="up">Up</option>
+                            <option value="down">Down</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Base</label>
+                        <select id="pct_base">
+                            <option value="24h">24h</option>
+                            <option value="previous_close">Previous Close (stocks)</option>
+                            <option value="baseline">Baseline (capture now)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row adv-cond adv-tech" style="display:none">
+                    <div class="form-group">
+                        <label>Indicator</label>
+                        <select id="tech_indicator">
+                            <option value="rsi">RSI</option>
+                            <option value="sma">SMA</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Operator</label>
+                        <select id="tech_operator">
+                            <option value="greater_than">greater_than</option>
+                            <option value="less_than">less_than</option>
+                            <option value="crosses_above">crosses_above</option>
+                            <option value="crosses_below">crosses_below</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Threshold</label>
+                        <input type="number" id="tech_threshold" step="0.01" placeholder="e.g., 70" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Period</label>
+                        <input type="number" id="tech_period" step="1" value="14">
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Create Advanced Alert</button>
+        </form>
+    </div>
+
+    <!-- Advanced Alerts Table -->
+    <div class="card">
+        <div class="card-header">
+            <h3>Advanced Alerts</h3>
+        </div>
+        <div class="table-container">
+            <table class="alerts-table" id="adv-alerts-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Asset</th>
+                        <th>Type</th>
+                        <th>Timeframe</th>
+                        <th>Conditions</th>
+                        <th>Status</th>
+                        <th>Triggers</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="adv-alerts-tbody">
+                    <tr class="empty-state"><td colspan="8" class="text-center">No advanced alerts yet.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Success/Error Messages -->
+<div id="messages" class="messages-container"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Enhanced Dashboard JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    initializeDashboard();
+    setupEventListeners();
+    startAutoRefresh();
+});
+
+function initializeDashboard() {
+    loadDashboardData();
+    setupDarkModeToggle();
+}
+
+function setupEventListeners() {
+    // Dashboard controls
+    const refreshBtn = document.getElementById('refresh-dashboard');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', loadDashboardData);
+    }
+    
+    // Monitoring controls
+    const startBtn = document.getElementById('start-monitoring');
+    const stopBtn = document.getElementById('stop-monitoring');
+    const checkBtn = document.getElementById('check-now');
+    
+    if (startBtn) startBtn.addEventListener('click', () => toggleMonitoring(true));
+    if (stopBtn) stopBtn.addEventListener('click', () => toggleMonitoring(false));
+    if (checkBtn) checkBtn.addEventListener('click', performManualCheck);
+    
+    // Setup form submission if form exists
+    const alertForm = document.getElementById('alert-form');
+    if (alertForm) {
+        alertForm.addEventListener('submit', handleFormSubmit);
+    }
+    // Advanced alert form
+    const advForm = document.getElementById('adv-alert-form');
+    if (advForm) {
+        advForm.addEventListener('submit', handleAdvancedFormSubmit);
+    }
+    const advType = document.getElementById('adv_alert_type');
+    if (advType) {
+        advType.addEventListener('change', onAdvancedTypeChange);
+    }
+}
+
+async function loadDashboardData() {
+    try {
+        // Load all dashboard data in parallel
+        await Promise.all([
+            loadSystemHealth(),
+            loadAlerts(),
+            loadPrices(),
+            loadNotifications(),
+            loadAdvancedAlerts()
+        ]);
+        
+        updateLastRefreshTime();
+    } catch (error) {
+        console.error('Error loading dashboard data:', error);
+        showMessage('Failed to load dashboard data', 'error');
+    }
+}
+
+function onAdvancedTypeChange() {
+    const sel = document.getElementById('adv_alert_type').value;
+    const pct = document.querySelector('.adv-pct');
+    const tech = document.querySelector('.adv-tech');
+    if (sel === 'technical_indicator') {
+        pct.style.display = 'none';
+        tech.style.display = 'flex';
+    } else {
+        pct.style.display = 'flex';
+        tech.style.display = 'none';
+    }
+}
+
+async function handleAdvancedFormSubmit(e) {
+    e.preventDefault();
+    const symbol = document.getElementById('adv_asset_symbol').value.trim();
+    const assetType = document.getElementById('adv_asset_type').value;
+    const alertType = document.getElementById('adv_alert_type').value;
+    const timeframe = document.getElementById('adv_timeframe').value;
+    let conditions = {};
+    if (alertType === 'percentage_change') {
+        conditions = {
+            change_percentage: parseFloat(document.getElementById('pct_change').value),
+            direction: document.getElementById('pct_direction').value,
+            comparison_base: document.getElementById('pct_base').value
+        };
+    } else {
+        conditions = {
+            indicator: document.getElementById('tech_indicator').value,
+            operator: document.getElementById('tech_operator').value,
+            threshold: parseFloat(document.getElementById('tech_threshold').value),
+            period: parseInt(document.getElementById('tech_period').value)
+        };
+    }
+    const payload = { asset_symbol: symbol, asset_type: assetType, alert_type: alertType, timeframe, conditions };
+    try {
+        const res = await fetch('/advanced-alerts/', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        if (!res.ok) throw new Error('Failed to create advanced alert');
+        showMessage('Advanced alert created', 'success');
+        loadAdvancedAlerts();
+        e.target.reset();
+    } catch (err) {
+        console.error(err);
+        showMessage('Failed to create advanced alert', 'error');
+    }
+}
+
+async function loadAdvancedAlerts() {
+    try {
+        const res = await fetch('/advanced-alerts/');
+        const items = await res.json();
+        updateAdvancedTable(items);
+    } catch (e) {
+        console.error('Error loading advanced alerts', e);
+    }
+}
+
+function updateAdvancedTable(items) {
+    const tbody = document.getElementById('adv-alerts-tbody');
+    if (!tbody) return;
+    if (!items || !items.length) {
+        tbody.innerHTML = '<tr class="empty-state"><td colspan="8" class="text-center">No advanced alerts yet.</td></tr>';
+        return;
+    }
+    tbody.innerHTML = items.map(a => {
+        const cond = JSON.stringify(a.conditions);
+        const status = a.is_active ? 'Active' : 'Inactive';
+        return `
+        <tr data-adv-id="${a.id}">
+            <td>${a.id}</td>
+            <td>${a.asset_symbol} <span class="badge badge-${a.asset_type}">${a.asset_type.toUpperCase()}</span></td>
+            <td>${a.alert_type}</td>
+            <td>${a.timeframe}</td>
+            <td><code>${cond}</code></td>
+            <td><span class="status-badge ${a.is_active ? 'status-active' : 'status-inactive'}">${status}</span></td>
+            <td>${a.trigger_count}</td>
+            <td>
+                <button class="btn btn-sm btn-secondary" onclick="toggleAdvanced(${a.id})">${a.is_active ? 'Deactivate' : 'Activate'}</button>
+                <button class="btn btn-sm btn-error" onclick="deleteAdvanced(${a.id})">Delete</button>
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+async function toggleAdvanced(id) {
+    try {
+        const res = await fetch(`/advanced-alerts/${id}/toggle`, { method: 'POST' });
+        if (!res.ok) throw new Error();
+        showMessage('Advanced alert updated', 'success');
+        loadAdvancedAlerts();
+    } catch (e) {
+        showMessage('Failed to toggle', 'error');
+    }
+}
+
+async function deleteAdvanced(id) {
+    if (!confirm('Delete advanced alert?')) return;
+    try {
+        const res = await fetch(`/advanced-alerts/${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error();
+        showMessage('Advanced alert deleted', 'success');
+        loadAdvancedAlerts();
+    } catch (e) {
+        showMessage('Failed to delete', 'error');
+    }
+}
+
+async function loadSystemHealth() {
+    try {
+        const response = await fetch('/health/detailed');
+        const data = await response.json();
+        
+        // Update system health status
+        const healthStatus = document.getElementById('system-health-status');
+        if (healthStatus) {
+            const isHealthy = data.overall_status === 'healthy';
+            const statusClass = isHealthy ? 'healthy' : 'error';
+            const statusText = isHealthy ? 'Healthy' : 'Error';
+            
+            healthStatus.innerHTML = `
+                <span class="status-indicator ${statusClass}">●</span>
+                <span class="status-text">${statusText}</span>
+            `;
+        }
+        
+        // Update uptime and monitored count
+        const uptimeElement = document.getElementById('system-uptime');
+        if (uptimeElement && data.uptime) {
+            uptimeElement.textContent = `${data.uptime.toFixed(1)}%`;
+        }
+        
+    } catch (error) {
+        console.error('Error loading system health:', error);
+        const healthStatus = document.getElementById('system-health-status');
+        if (healthStatus) {
+            healthStatus.innerHTML = `
+                <span class="status-indicator error">●</span>
+                <span class="status-text">Error</span>
+            `;
+        }
+    }
+}
+
+async function loadAlerts() {
+    try {
+        const [alertsResponse, statsResponse] = await Promise.all([
+            fetch('/alerts/'),
+            fetch('/alerts/stats')
+        ]);
+        
+        const alerts = await alertsResponse.json();
+        const stats = await statsResponse.json();
+        
+        // Update modern dashboard stats
+        updateAlertStats(alerts, stats);
+        
+        // Update alerts table if it exists
+        const alertsTable = document.getElementById('alerts-table');
+        if (alertsTable) {
+            updateAlertsTable(alerts);
+        }
+        
+    } catch (error) {
+        console.error('Error loading alerts:', error);
+        showMessage('Failed to load alerts', 'error');
+    }
+}
+
+function updateAlertStats(alerts, stats) {
+    // Count active and paused alerts
+    const activeCount = alerts.filter(a => a.is_active).length;
+    const pausedCount = alerts.filter(a => !a.is_active).length;
+    
+    // Update dashboard cards
+    const activeElement = document.getElementById('active-alerts');
+    const pausedElement = document.getElementById('paused-alerts');
+    const triggeredElement = document.getElementById('triggered-today');
+    const monitoredElement = document.getElementById('monitored-count');
+    
+    if (activeElement) activeElement.textContent = activeCount;
+    if (pausedElement) pausedElement.textContent = pausedCount;
+    if (triggeredElement) triggeredElement.textContent = stats.triggered_today || 0;
+    if (monitoredElement) monitoredElement.textContent = alerts.length;
+}
+
+async function loadPrices() {
+    try {
+        // Mock prices for now - replace with your actual price endpoint
+        const priceList = document.getElementById('price-list');
+        if (!priceList) return;
+        
+        // Simulate loading
+        priceList.innerHTML = '<div class="loading-state">Loading prices...</div>';
+        
+        // Mock data - replace with actual API call
+        setTimeout(() => {
+            const mockPrices = [
+                { symbol: 'BTC', price: 43250.80, change: 2.4 },
+                { symbol: 'ETH', price: 2598.45, change: -1.2 },
+                { symbol: 'AAPL', price: 175.20, change: 0.8 }
+            ];
+            
+            priceList.innerHTML = mockPrices.map(asset => `
+                <div class="price-item">
+                    <div class="price-symbol">${asset.symbol}</div>
+                    <div class="price-details">
+                        <div class="price-value">$${asset.price.toLocaleString()}</div>
+                        <div class="price-change ${asset.change >= 0 ? 'positive' : 'negative'}">
+                            ${asset.change >= 0 ? '↗' : '↘'} ${asset.change >= 0 ? '+' : ''}${asset.change}%
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }, 1000);
+        
+    } catch (error) {
+        console.error('Error loading prices:', error);
+        const priceList = document.getElementById('price-list');
+        if (priceList) {
+            priceList.innerHTML = '<div class="loading-state">Error loading prices</div>';
+        }
+    }
+}
+
+async function loadNotifications() {
+    try {
+        const notificationList = document.getElementById('notification-list');
+        if (!notificationList) return;
+        
+        // Simulate loading
+        notificationList.innerHTML = '<div class="loading-state">Loading notifications...</div>';
+        
+        // Mock notifications - replace with actual API call
+        setTimeout(() => {
+            const mockNotifications = [
+                {
+                    icon: '🚨',
+                    message: 'BTC reached $45,000 - Alert triggered',
+                    time: '2 minutes ago'
+                },
+                {
+                    icon: '✅',
+                    message: 'System health check completed',
+                    time: '15 minutes ago'
+                },
+                {
+                    icon: '⚠️',
+                    message: 'ETH approaching target price',
+                    time: '1 hour ago'
+                }
+            ];
+            
+            notificationList.innerHTML = mockNotifications.map(notif => `
+                <div class="notification-item">
+                    <div class="notification-icon">${notif.icon}</div>
+                    <div class="notification-content">
+                        <div class="notification-message">${notif.message}</div>
+                        <div class="notification-time">${notif.time}</div>
+                    </div>
+                </div>
+            `).join('');
+        }, 800);
+        
+    } catch (error) {
+        console.error('Error loading notifications:', error);
+        const notificationList = document.getElementById('notification-list');
+        if (notificationList) {
+            notificationList.innerHTML = '<div class="loading-state">Error loading notifications</div>';
+        }
+    }
+}
+
+function setupDarkModeToggle() {
+    const darkModeToggle = document.getElementById('dark-mode-toggle');
+    if (!darkModeToggle) return;
+    
+    // Check for saved theme or default to light
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    
+    // Update toggle icon
+    const icon = darkModeToggle.querySelector('.dark-mode-icon');
+    if (icon) {
+        icon.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+    }
+    
+    darkModeToggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        
+        if (icon) {
+            icon.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        }
+    });
+}
+
+function startAutoRefresh() {
+    // Refresh dashboard data every 30 seconds
+    setInterval(loadDashboardData, 30000);
+}
+
+function updateLastRefreshTime() {
+    // Add a subtle indicator of last refresh time
+    const now = new Date();
+    console.log(`Dashboard refreshed at ${now.toLocaleTimeString()}`);
+}
+
+async function toggleMonitoring(start) {
+    try {
+        const endpoint = start ? '/scheduler/start' : '/scheduler/stop';
+        const response = await fetch(endpoint, { method: 'POST' });
+        
+        if (response.ok) {
+            const action = start ? 'started' : 'stopped';
+            showMessage(`Monitoring ${action} successfully!`, 'success');
+            
+            // Update monitoring status
+            const statusElement = document.getElementById('monitoring-status');
+            if (statusElement) {
+                statusElement.textContent = start ? 'Active' : 'Stopped';
+                statusElement.className = start ? 'control-status' : 'control-value';
+            }
+            
+            // Refresh data
+            loadDashboardData();
+        } else {
+            const error = await response.json();
+            showMessage(error.detail || 'Failed to toggle monitoring', 'error');
+        }
+    } catch (error) {
+        console.error('Error toggling monitoring:', error);
+        showMessage('Network error - please try again', 'error');
+    }
+}
+
+async function performManualCheck() {
+    try {
+        const response = await fetch('/scheduler/run-once', { method: 'POST' });
+        
+        if (response.ok) {
+            showMessage('Manual check initiated!', 'success');
+            
+            // Refresh data after a short delay
+            setTimeout(loadDashboardData, 2000);
+        } else {
+            const error = await response.json();
+            showMessage(error.detail || 'Failed to perform manual check', 'error');
+        }
+    } catch (error) {
+        console.error('Error performing manual check:', error);
+        showMessage('Network error - please try again', 'error');
+    }
+}
+
+async function handleFormSubmit(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const formData = new FormData(form);
+    const submitButton = form.querySelector('button[type="submit"]');
+    
+    // Disable submit button during request
+    submitButton.disabled = true;
+    submitButton.textContent = 'Creating...';
+    
+    try {
+        const response = await fetch('/alerts/', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            // Success - show message and reset form
+            showMessage('Alert created successfully!', 'success');
+            form.reset();
+            
+            // Refresh alerts
+            loadAlerts();
+        } else {
+            // Error - show validation or server error
+            const errorMessage = data.detail || 'Failed to create alert';
+            showMessage(errorMessage, 'error');
+        }
+        
+    } catch (error) {
+        console.error('Error creating alert:', error);
+        showMessage('Network error - please try again', 'error');
+    } finally {
+        // Re-enable submit button
+        submitButton.disabled = false;
+        submitButton.textContent = 'Create Alert';
+    }
+}
+
+function showMessage(message, type) {
+    const messagesContainer = document.getElementById('messages');
+    
+    // Remove existing messages
+    messagesContainer.innerHTML = '';
+    
+    // Create message element
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${type}`;
+    messageDiv.innerHTML = `
+        <span class="message-text">${message}</span>
+        <button class="message-close" onclick="closeMessage(this)">&times;</button>
+    `;
+    
+    messagesContainer.appendChild(messageDiv);
+    
+    // Auto-hide success messages after 5 seconds
+    if (type === 'success') {
+        setTimeout(() => {
+            if (messageDiv.parentNode) {
+                messageDiv.remove();
+            }
+        }, 5000);
+    }
+}
+
+function closeMessage(button) {
+    button.parentElement.remove();
+}
+
+// Form validation helpers
+function validateForm(form) {
+    const assetSymbol = form.asset_symbol.value.trim();
+    const assetType = form.asset_type.value;
+    const conditionType = form.condition_type.value;
+    const thresholdPrice = parseFloat(form.threshold_price.value);
+    
+    if (!assetSymbol) {
+        showMessage('Asset symbol is required', 'error');
+        return false;
+    }
+    
+    if (!assetType) {
+        showMessage('Asset type is required', 'error');
+        return false;
+    }
+    
+    if (!conditionType) {
+        showMessage('Condition is required', 'error');
+        return false;
+    }
+    
+    if (!thresholdPrice || thresholdPrice <= 0) {
+        showMessage('Valid threshold price is required', 'error');
+        return false;
+    }
+    
+    return true;
+}
+
+function updateStats(stats) {
+    document.getElementById('active-alerts').textContent = stats.active_alerts;
+    
+    // Update last check time (placeholder for now)
+    const now = new Date();
+    document.getElementById('last-check').textContent = now.toLocaleTimeString();
+}
+
+function updateAlertsTable(alerts) {
+    const tbody = document.getElementById('alerts-tbody');
+    
+    if (alerts.length === 0) {
+        tbody.innerHTML = `
+            <tr class="empty-state">
+                <td colspan="8" class="text-center">
+                    No alerts configured yet. Create your first alert above!
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    tbody.innerHTML = alerts.map(alert => {
+        const createdDate = new Date(alert.created_at).toLocaleDateString();
+        const statusClass = alert.is_active ? 'status-active' : 'status-inactive';
+        const statusText = alert.is_active ? 'Active' : 'Inactive';
+        const toggleText = alert.is_active ? 'Deactivate' : 'Activate';
+        
+        return `
+            <tr class="${statusClass}" data-alert-id="${alert.id}">
+                <td class="select-cell">
+                    <input type="checkbox" class="alert-checkbox" value="${alert.id}" onchange="updateBulkActions()">
+                </td>
+                <td class="asset-cell">
+                    <span class="asset-symbol">${alert.asset_symbol}</span>
+                </td>
+                <td class="asset-type">
+                    <span class="badge badge-${alert.asset_type}">${alert.asset_type.toUpperCase()}</span>
+                </td>
+                <td class="condition">
+                    <span class="condition-badge">${alert.condition_type}</span>
+                </td>
+                <td class="threshold">
+                    $${alert.threshold_price.toFixed(2)}
+                </td>
+                <td class="status">
+                    <span class="status-badge ${statusClass}">${statusText}</span>
+                </td>
+                <td class="created-date">
+                    ${createdDate}
+                </td>
+                <td class="actions">
+                    <button 
+                        class="btn btn-sm btn-primary"
+                        onclick="editAlert(${alert.id})"
+                        title="Edit alert"
+                    >
+                        Edit
+                    </button>
+                    <button 
+                        class="btn btn-sm btn-secondary"
+                        onclick="toggleAlert(${alert.id})"
+                        title="${toggleText} alert"
+                    >
+                        ${toggleText}
+                    </button>
+                    <button 
+                        class="btn btn-sm btn-error"
+                        onclick="deleteAlert(${alert.id}, '${alert.asset_symbol}')"
+                        title="Delete alert"
+                    >
+                        Delete
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+async function toggleAlert(alertId) {
+    try {
+        const response = await fetch(`/alerts/${alertId}/toggle`, {
+            method: 'POST'
+        });
+        
+        if (response.ok) {
+            const updatedAlert = await response.json();
+            const statusText = updatedAlert.is_active ? 'activated' : 'deactivated';
+            showMessage(`Alert ${statusText} successfully!`, 'success');
+            
+            // Refresh alerts table
+            loadAlerts();
+        } else {
+            const error = await response.json();
+            showMessage(error.detail || 'Failed to toggle alert', 'error');
+        }
+        
+    } catch (error) {
+        console.error('Error toggling alert:', error);
+        showMessage('Network error - please try again', 'error');
+    }
+}
+
+async function deleteAlert(alertId, assetSymbol) {
+    // Show confirmation dialog
+    const confirmed = confirm(`Are you sure you want to delete the alert for ${assetSymbol}?\n\nThis action cannot be undone.`);
+    
+    if (!confirmed) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/alerts/${alertId}`, {
+            method: 'DELETE'
+        });
+        
+        if (response.ok) {
+            showMessage('Alert deleted successfully!', 'success');
+            
+            // Refresh alerts table
+            loadAlerts();
+        } else {
+            const error = await response.json();
+            showMessage(error.detail || 'Failed to delete alert', 'error');
+        }
+        
+    } catch (error) {
+        console.error('Error deleting alert:', error);
+        showMessage('Network error - please try again', 'error');
+    }
+}
+
+// Edit alert functionality
+async function editAlert(alertId) {
+    try {
+        const response = await fetch(`/alerts/${alertId}`);
+        
+        if (response.ok) {
+            const alert = await response.json();
+            showEditModal(alert);
+        } else {
+            const error = await response.json();
+            showMessage(error.detail || 'Failed to load alert', 'error');
+        }
+        
+    } catch (error) {
+        console.error('Error loading alert for edit:', error);
+        showMessage('Network error - please try again', 'error');
+    }
+}
+
+function showEditModal(alert) {
+    // Create modal overlay
+    const modalOverlay = document.createElement('div');
+    modalOverlay.className = 'modal-overlay';
+    modalOverlay.innerHTML = `
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Edit Alert</h3>
+                <button class="modal-close" onclick="closeEditModal()">&times;</button>
+            </div>
+            <form class="modal-form" onsubmit="handleEditSubmit(event, ${alert.id})">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-asset-symbol">Asset Symbol</label>
+                        <input 
+                            type="text" 
+                            id="edit-asset-symbol" 
+                            name="asset_symbol" 
+                            value="${alert.asset_symbol}"
+                            required
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-asset-type">Asset Type</label>
+                        <select id="edit-asset-type" name="asset_type" required>
+                            <option value="stock" ${alert.asset_type === 'stock' ? 'selected' : ''}>Stock</option>
+                            <option value="crypto" ${alert.asset_type === 'crypto' ? 'selected' : ''}>Crypto</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-condition-type">Condition</label>
+                        <select id="edit-condition-type" name="condition_type" required>
+                            <option value=">=" ${alert.condition_type === '>=' ? 'selected' : ''}>&gt;= (Price above or equal)</option>
+                            <option value="<=" ${alert.condition_type === '<=' ? 'selected' : ''}>&lt;= (Price below or equal)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-threshold-price">Threshold Price ($)</label>
+                        <input 
+                            type="number" 
+                            id="edit-threshold-price" 
+                            name="threshold_price" 
+                            step="0.01" 
+                            min="0"
+                            value="${alert.threshold_price}"
+                            required
+                        >
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input 
+                            type="checkbox" 
+                            id="edit-is-active" 
+                            name="is_active" 
+                            ${alert.is_active ? 'checked' : ''}
+                        >
+                        Alert is active
+                    </label>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Alert</button>
+                </div>
+            </form>
+        </div>
+    `;
+    
+    document.body.appendChild(modalOverlay);
+    
+    // Focus first input
+    document.getElementById('edit-asset-symbol').focus();
+}
+
+function closeEditModal() {
+    const modal = document.querySelector('.modal-overlay');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+async function handleEditSubmit(event, alertId) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const formData = new FormData(form);
+    
+    // Convert form data to JSON for PUT request
+    const updateData = {
+        asset_symbol: formData.get('asset_symbol'),
+        asset_type: formData.get('asset_type'),
+        condition_type: formData.get('condition_type'),
+        threshold_price: parseFloat(formData.get('threshold_price')),
+        is_active: formData.has('is_active')
+    };
+    
+    try {
+        const response = await fetch(`/alerts/${alertId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updateData)
+        });
+        
+        if (response.ok) {
+            showMessage('Alert updated successfully!', 'success');
+            closeEditModal();
+            loadAlerts();
+        } else {
+            const error = await response.json();
+            showMessage(error.detail || 'Failed to update alert', 'error');
+        }
+        
+    } catch (error) {
+        console.error('Error updating alert:', error);
+        showMessage('Network error - please try again', 'error');
+    }
+}
+
+// Bulk operations
+function toggleSelectAll() {
+    const selectAll = document.getElementById('select-all');
+    const checkboxes = document.querySelectorAll('.alert-checkbox');
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAll.checked;
+    });
+    
+    updateBulkActions();
+}
+
+function updateBulkActions() {
+    const checkboxes = document.querySelectorAll('.alert-checkbox');
+    const checkedBoxes = document.querySelectorAll('.alert-checkbox:checked');
+    const bulkActions = document.getElementById('bulk-actions');
+    const selectAll = document.getElementById('select-all');
+    
+    // Update select all checkbox state
+    if (checkedBoxes.length === 0) {
+        selectAll.indeterminate = false;
+        selectAll.checked = false;
+    } else if (checkedBoxes.length === checkboxes.length) {
+        selectAll.indeterminate = false;
+        selectAll.checked = true;
+    } else {
+        selectAll.indeterminate = true;
+        selectAll.checked = false;
+    }
+    
+    // Show/hide bulk actions
+    if (checkedBoxes.length > 0) {
+        bulkActions.style.display = 'flex';
+    } else {
+        bulkActions.style.display = 'none';
+    }
+}
+
+function clearSelection() {
+    const checkboxes = document.querySelectorAll('.alert-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    updateBulkActions();
+}
+
+async function toggleSelectedAlerts() {
+    const checkedBoxes = document.querySelectorAll('.alert-checkbox:checked');
+    const alertIds = Array.from(checkedBoxes).map(cb => parseInt(cb.value));
+    
+    if (alertIds.length === 0) return;
+    
+    const confirmed = confirm(`Are you sure you want to toggle ${alertIds.length} alert(s)?`);
+    if (!confirmed) return;
+    
+    try {
+        const promises = alertIds.map(id => 
+            fetch(`/alerts/${id}/toggle`, { method: 'POST' })
+        );
+        
+        const responses = await Promise.all(promises);
+        const successful = responses.filter(r => r.ok).length;
+        const failed = responses.length - successful;
+        
+        if (successful > 0) {
+            showMessage(`${successful} alert(s) toggled successfully!`, 'success');
+        }
+        if (failed > 0) {
+            showMessage(`Failed to toggle ${failed} alert(s)`, 'error');
+        }
+        
+        clearSelection();
+        loadAlerts();
+        
+    } catch (error) {
+        console.error('Error toggling alerts:', error);
+        showMessage('Network error - please try again', 'error');
+    }
+}
+
+async function deleteSelectedAlerts() {
+    const checkedBoxes = document.querySelectorAll('.alert-checkbox:checked');
+    const alertIds = Array.from(checkedBoxes).map(cb => parseInt(cb.value));
+    
+    if (alertIds.length === 0) return;
+    
+    const confirmed = confirm(`Are you sure you want to delete ${alertIds.length} alert(s)?\n\nThis action cannot be undone.`);
+    if (!confirmed) return;
+    
+    try {
+        const promises = alertIds.map(id => 
+            fetch(`/alerts/${id}`, { method: 'DELETE' })
+        );
+        
+        const responses = await Promise.all(promises);
+        const successful = responses.filter(r => r.ok).length;
+        const failed = responses.length - successful;
+        
+        if (successful > 0) {
+            showMessage(`${successful} alert(s) deleted successfully!`, 'success');
+        }
+        if (failed > 0) {
+            showMessage(`Failed to delete ${failed} alert(s)`, 'error');
+        }
+        
+        clearSelection();
+        loadAlerts();
+        
+    } catch (error) {
+        console.error('Error deleting alerts:', error);
+        showMessage('Network error - please try again', 'error');
+    }
+}
+</script>
+{% endblock %}

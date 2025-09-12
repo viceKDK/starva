@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Price Monitor{% endblock %}</title>
+    
+    <!-- Meta tags for SEO and social sharing -->
+    <meta name="description" content="Professional price monitoring application for stocks and cryptocurrencies with real-time alerts">
+    <meta name="author" content="Price Monitor">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <link href="/static/css/output.css" rel="stylesheet">
+    
+    <!-- Custom CSS for enhanced styling -->
+    <style>
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* Custom scrollbar for webkit browsers */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        
+        .dark ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        
+        /* Loading animation for skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+        }
+        
+        .dark .skeleton {
+            background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+            background-size: 200% 100%;
+        }
+        
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        /* Toast notification styles */
+        .toast {
+            @apply fixed right-4 top-4 max-w-sm bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4 transform transition-all duration-300 ease-in-out z-50;
+        }
+        
+        .toast.toast-success {
+            @apply border-success-200 dark:border-success-600;
+        }
+        
+        .toast.toast-error {
+            @apply border-error-200 dark:border-error-600;
+        }
+        
+        .toast.toast-warning {
+            @apply border-warning-200 dark:border-warning-600;
+        }
+        
+        .toast.toast-info {
+            @apply border-primary-200 dark:border-primary-600;
+        }
+        
+        /* Slide-in animation for toasts */
+        .toast-enter {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        
+        .toast-exit {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        
+        /* Price change indicators */
+        .price-change {
+            @apply inline-flex items-center text-sm font-medium;
+        }
+        
+        .price-change.positive {
+            @apply text-success-600 dark:text-success-400;
+        }
+        
+        .price-change.negative {
+            @apply text-error-600 dark:text-error-400;
+        }
+        
+        /* Gradient backgrounds */
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .dark .gradient-bg {
+            background: linear-gradient(135deg, #4c1d95 0%, #1e1b4b 100%);
+        }
+        
+        /* Enhanced focus styles for accessibility */
+        .focus-ring {
+            @apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800;
+        }
+        
+        /* Custom animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        /* Pulse animation for live indicators */
+        .pulse-ring {
+            @apply absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75 animate-ping;
+        }
+    </style>
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="h-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white transition-colors duration-200">
+    
+    <!-- Skip to main content for accessibility -->
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 bg-primary-600 text-white px-4 py-2 rounded-md z-50">
+        Skip to main content
+    </a>
+    
+    <!-- Navigation -->
+    {% include 'components/navigation_v2.html' %}
+    
+    <!-- Main Content -->
+    <main id="main-content" class="focus:outline-none">
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Footer -->
+    {% include 'components/footer_v2.html' %}
+    
+    <!-- Global Loading Overlay -->
+    <div id="global-loading" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="bg-white dark:bg-gray-800 rounded-lg p-6 flex items-center space-x-3">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+            <span class="text-lg font-medium text-gray-900 dark:text-white">Loading...</span>
+        </div>
+    </div>
+    
+    <!-- Toast Container -->
+    <div id="toast-container" aria-live="polite" aria-atomic="true" class="fixed top-4 right-4 z-50 space-y-2"></div>
+    
+    <!-- Scripts -->
+    <script src="/static/js/icons.js"></script>
+    <script src="/static/js/utils.js"></script>
+    <script src="/static/js/notifications.js"></script>
+    <script src="/static/js/theme.js"></script>
+    
+    {% block scripts %}{% endblock %}
+    
+    <!-- Global Error Handler -->
+    <script>
+        window.addEventListener('error', function(e) {
+            console.error('Global error:', e.error);
+            showToast('An unexpected error occurred. Please refresh the page.', 'error');
+        });
+        
+        window.addEventListener('unhandledrejection', function(e) {
+            console.error('Unhandled promise rejection:', e.reason);
+            showToast('Connection error. Please check your internet connection.', 'error');
+        });
+    </script>
+    
+    <!-- Service Worker for PWA features (optional) -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/static/js/sw.js')
+                .then(registration => console.log('SW registered:', registration))
+                .catch(error => console.log('SW registration failed:', error));
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,375 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - Price Monitor{% endblock %}
+
+{% block content %}
+<div class="settings">
+    <div class="welcome-section">
+        <h2>Application Settings</h2>
+        <p class="subtitle">Configure your price monitoring application</p>
+    </div>
+
+    <!-- Configuration Health Status -->
+    <div class="card" id="health-status-card">
+        <h3>Configuration Health</h3>
+        <div id="config-health" class="config-health">
+            <div class="loading">Loading configuration health...</div>
+        </div>
+    </div>
+
+    <!-- Hot-Reload Notice -->
+    <div class="card info-card">
+        <h4>💡 Configuration Tips</h4>
+        <ul>
+            <li><strong>Hot-Reload:</strong> Settings marked with 🔄 take effect immediately</li>
+            <li><strong>Restart Required:</strong> Settings marked with 🔄 require application restart</li>
+            <li><strong>Sensitive:</strong> API keys and credentials can only be changed via .env file</li>
+            <li><strong>Validation:</strong> All changes are validated before being applied</li>
+        </ul>
+    </div>
+
+    <!-- Configuration Sections -->
+    <div id="config-sections" class="config-sections">
+        <div class="loading">Loading configuration...</div>
+    </div>
+
+    <!-- Save Changes Button -->
+    <div class="card save-section" style="display: none;" id="save-section">
+        <div class="save-controls">
+            <button id="save-all-btn" class="btn btn-primary">
+                💾 Save All Changes
+            </button>
+            <button id="reset-btn" class="btn btn-secondary">
+                🔄 Reset Changes
+            </button>
+            <span id="unsaved-changes" class="unsaved-indicator">
+                You have unsaved changes
+            </span>
+        </div>
+    </div>
+</div>
+
+<script>
+// Configuration management functionality
+let originalConfig = {};
+let currentConfig = {};
+let hasUnsavedChanges = false;
+
+// Initialize settings page
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Settings page loaded');
+    loadConfigurationHealth();
+    loadConfiguration();
+    
+    // Set up periodic health checks
+    setInterval(loadConfigurationHealth, 30000); // Every 30 seconds
+});
+
+async function loadConfigurationHealth() {
+    try {
+        const response = await fetch('/api/config/health');
+        const health = await response.json();
+        
+        const healthElement = document.getElementById('config-health');
+        
+        if (health.healthy) {
+            healthElement.innerHTML = `
+                <div class="health-status healthy">
+                    <span class="status-icon">✅</span>
+                    <span class="status-text">Configuration is healthy</span>
+                </div>
+            `;
+        } else {
+            let issuesHtml = '';
+            if (health.issues && health.issues.length > 0) {
+                issuesHtml = '<div class="health-issues"><h5>Issues:</h5><ul>';
+                health.issues.forEach(issue => {
+                    issuesHtml += `<li class="error">${issue}</li>`;
+                });
+                issuesHtml += '</ul></div>';
+            }
+            
+            let warningsHtml = '';
+            if (health.warnings && health.warnings.length > 0) {
+                warningsHtml = '<div class="health-warnings"><h5>Warnings:</h5><ul>';
+                health.warnings.forEach(warning => {
+                    warningsHtml += `<li class="warning">${warning}</li>`;
+                });
+                warningsHtml += '</ul></div>';
+            }
+            
+            healthElement.innerHTML = `
+                <div class="health-status unhealthy">
+                    <span class="status-icon">⚠️</span>
+                    <span class="status-text">Configuration needs attention</span>
+                    <div class="health-details">
+                        ${issuesHtml}
+                        ${warningsHtml}
+                    </div>
+                </div>
+            `;
+        }
+        
+    } catch (error) {
+        console.error('Failed to load configuration health:', error);
+        document.getElementById('config-health').innerHTML = `
+            <div class="health-status error">
+                <span class="status-icon">❌</span>
+                <span class="status-text">Failed to load configuration health</span>
+            </div>
+        `;
+    }
+}
+
+async function loadConfiguration() {
+    try {
+        const response = await fetch('/api/config/editable');
+        const config = await response.json();
+        
+        originalConfig = JSON.parse(JSON.stringify(config));
+        currentConfig = JSON.parse(JSON.stringify(config));
+        
+        renderConfigurationSections(config);
+        
+    } catch (error) {
+        console.error('Failed to load configuration:', error);
+        showMessage('Failed to load configuration: ' + error.message, 'error');
+    }
+}
+
+function renderConfigurationSections(config) {
+    const sectionsContainer = document.getElementById('config-sections');
+    let sectionsHtml = '';
+    
+    Object.entries(config).forEach(([category, settings]) => {
+        sectionsHtml += `
+            <div class="card config-category">
+                <h3>${category}</h3>
+                <div class="config-settings">
+        `;
+        
+        Object.entries(settings).forEach(([key, setting]) => {
+            const reloadIcon = setting.hot_reloadable ? '🔄' : '🔄';
+            const reloadText = setting.hot_reloadable ? 'Hot-reload' : 'Restart required';
+            
+            sectionsHtml += `
+                <div class="config-setting">
+                    <div class="setting-header">
+                        <label for="${key}">${formatSettingName(key)}</label>
+                        <span class="reload-indicator" title="${reloadText}">
+                            ${reloadIcon}
+                        </span>
+                    </div>
+                    <div class="setting-description">${setting.description}</div>
+                    <div class="setting-input">
+                        ${renderSettingInput(key, setting)}
+                    </div>
+                </div>
+            `;
+        });
+        
+        sectionsHtml += '</div></div>';
+    });
+    
+    sectionsContainer.innerHTML = sectionsHtml;
+    setupEventListeners();
+}
+
+function renderSettingInput(key, setting) {
+    const value = setting.value;
+    
+    switch (setting.validation_type) {
+        case 'bool':
+            return `
+                <select id="${key}" onchange="handleSettingChange('${key}', this.value)">
+                    <option value="true" ${value ? 'selected' : ''}>Enabled</option>
+                    <option value="false" ${!value ? 'selected' : ''}>Disabled</option>
+                </select>
+            `;
+            
+        case 'int':
+        case 'float':
+            const min = setting.min_value !== null ? `min="${setting.min_value}"` : '';
+            const max = setting.max_value !== null ? `max="${setting.max_value}"` : '';
+            return `
+                <input 
+                    type="number" 
+                    id="${key}" 
+                    value="${value}" 
+                    ${min} 
+                    ${max}
+                    onchange="handleSettingChange('${key}', this.value)"
+                />
+            `;
+            
+        case 'str':
+            if (setting.valid_options) {
+                let optionsHtml = '';
+                setting.valid_options.forEach(option => {
+                    const selected = option === value ? 'selected' : '';
+                    optionsHtml += `<option value="${option}" ${selected}>${option}</option>`;
+                });
+                return `
+                    <select id="${key}" onchange="handleSettingChange('${key}', this.value)">
+                        ${optionsHtml}
+                    </select>
+                `;
+            } else {
+                return `
+                    <input 
+                        type="text" 
+                        id="${key}" 
+                        value="${value}" 
+                        onchange="handleSettingChange('${key}', this.value)"
+                    />
+                `;
+            }
+            
+        default:
+            return `
+                <input 
+                    type="text" 
+                    id="${key}" 
+                    value="${value}" 
+                    onchange="handleSettingChange('${key}', this.value)"
+                />
+            `;
+    }
+}
+
+function formatSettingName(key) {
+    return key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+}
+
+function handleSettingChange(key, value) {
+    // Find the setting in current config
+    let found = false;
+    Object.entries(currentConfig).forEach(([category, settings]) => {
+        if (key in settings) {
+            // Convert value based on validation type
+            const validationType = settings[key].validation_type;
+            let convertedValue = value;
+            
+            switch (validationType) {
+                case 'int':
+                    convertedValue = parseInt(value);
+                    break;
+                case 'float':
+                    convertedValue = parseFloat(value);
+                    break;
+                case 'bool':
+                    convertedValue = value === 'true';
+                    break;
+            }
+            
+            settings[key].value = convertedValue;
+            found = true;
+        }
+    });
+    
+    if (found) {
+        checkForUnsavedChanges();
+    }
+}
+
+function checkForUnsavedChanges() {
+    hasUnsavedChanges = JSON.stringify(originalConfig) !== JSON.stringify(currentConfig);
+    
+    const saveSection = document.getElementById('save-section');
+    if (hasUnsavedChanges) {
+        saveSection.style.display = 'block';
+    } else {
+        saveSection.style.display = 'none';
+    }
+}
+
+function setupEventListeners() {
+    // Save all changes
+    document.getElementById('save-all-btn')?.addEventListener('click', saveAllChanges);
+    
+    // Reset changes
+    document.getElementById('reset-btn')?.addEventListener('click', resetChanges);
+}
+
+async function saveAllChanges() {
+    if (!hasUnsavedChanges) {
+        showMessage('No changes to save', 'info');
+        return;
+    }
+    
+    const saveBtn = document.getElementById('save-all-btn');
+    saveBtn.disabled = true;
+    saveBtn.textContent = '💾 Saving...';
+    
+    try {
+        // Flatten the settings for the API
+        const flatSettings = {};
+        Object.entries(currentConfig).forEach(([category, settings]) => {
+            Object.entries(settings).forEach(([key, setting]) => {
+                flatSettings[key] = setting.value;
+            });
+        });
+        
+        const response = await fetch('/api/config/settings', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                settings: flatSettings
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.total_successful > 0) {
+            showMessage(`Successfully updated ${result.total_successful} settings`, 'success');
+            originalConfig = JSON.parse(JSON.stringify(currentConfig));
+            hasUnsavedChanges = false;
+            document.getElementById('save-section').style.display = 'none';
+            
+            // Reload health status
+            setTimeout(loadConfigurationHealth, 1000);
+        }
+        
+        if (result.total_failed > 0) {
+            let errorMsg = `Failed to update ${result.total_failed} settings:\n`;
+            Object.entries(result.failed_updates).forEach(([key, msg]) => {
+                errorMsg += `${key}: ${msg}\n`;
+            });
+            showMessage(errorMsg, 'error');
+        }
+        
+    } catch (error) {
+        console.error('Failed to save settings:', error);
+        showMessage('Failed to save settings: ' + error.message, 'error');
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = '💾 Save All Changes';
+    }
+}
+
+function resetChanges() {
+    currentConfig = JSON.parse(JSON.stringify(originalConfig));
+    renderConfigurationSections(currentConfig);
+    hasUnsavedChanges = false;
+    document.getElementById('save-section').style.display = 'none';
+    showMessage('Changes reset', 'info');
+}
+
+// Utility functions (these should be in a shared JS file in a real app)
+function showMessage(text, type = 'success', duration = 5000) {
+    const messagesContainer = document.getElementById('messages');
+    
+    const message = document.createElement('div');
+    message.className = `message ${type}`;
+    message.textContent = text;
+    
+    messagesContainer.appendChild(message);
+    
+    setTimeout(() => {
+        message.remove();
+    }, duration);
+}
+</script>
+{% endblock %}

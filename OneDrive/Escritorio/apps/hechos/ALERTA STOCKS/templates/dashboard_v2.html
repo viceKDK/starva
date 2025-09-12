@@ -1,0 +1,291 @@
+{% extends "base_v2.html" %}
+
+{% block title %}Dashboard - Price Monitor{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+  <!-- Enhanced Header -->
+  <header class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center py-6">
+        <div class="flex items-center space-x-4">
+          <div class="flex-shrink-0">
+            <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg flex items-center justify-center">
+              <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z"></path>
+              </svg>
+            </div>
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Price Monitor</h1>
+            <p class="text-sm text-gray-600 dark:text-gray-400">Monitor your investments with real-time alerts</p>
+          </div>
+        </div>
+        
+        <div class="flex items-center space-x-3">
+          <!-- Theme Toggle -->
+          <button id="theme-toggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200" title="Toggle theme">
+            <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5 text-gray-600 dark:text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+            </svg>
+            <svg id="theme-toggle-light-icon" class="hidden w-5 h-5 text-gray-600 dark:text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path>
+            </svg>
+          </button>
+          
+          <!-- Refresh Button -->
+          <button id="refresh-dashboard" class="btn-primary flex items-center space-x-2">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"></path>
+            </svg>
+            <span>Refresh</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      
+      <!-- Active Alerts Card -->
+      <div class="card group hover:shadow-xl">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-12 h-12 bg-success-100 dark:bg-success-800 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+              <svg class="w-6 h-6 text-success-600 dark:text-success-200" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+              </svg>
+            </div>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Active Alerts</p>
+            <p class="text-2xl font-semibold text-gray-900 dark:text-white" id="active-alerts">
+              <span class="skeleton w-8 h-8 rounded">0</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Total Alerts Card -->
+      <div class="card group hover:shadow-xl">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-12 h-12 bg-primary-100 dark:bg-primary-800 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+              <svg class="w-6 h-6 text-primary-600 dark:text-primary-200" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+              </svg>
+            </div>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Alerts</p>
+            <p class="text-2xl font-semibold text-gray-900 dark:text-white" id="total-alerts">
+              <span class="skeleton w-8 h-8 rounded">0</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Triggered Today Card -->
+      <div class="card group hover:shadow-xl">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-12 h-12 bg-warning-100 dark:bg-warning-800 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+              <svg class="w-6 h-6 text-warning-600 dark:text-warning-200" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"></path>
+              </svg>
+            </div>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Triggered Today</p>
+            <p class="text-2xl font-semibold text-gray-900 dark:text-white" id="triggered-today">
+              <span class="skeleton w-8 h-8 rounded">0</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- System Status Card -->
+      <div class="card group hover:shadow-xl">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-12 h-12 bg-green-100 dark:bg-green-800 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+              <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+            </div>
+          </div>
+          <div class="ml-4">
+            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">System Status</p>
+            <p class="text-sm font-semibold text-green-600 dark:text-green-400" id="system-status">Online</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alert Management Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- Create Alert Form -->
+      <div class="lg:col-span-1">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+              <svg class="w-5 h-5 mr-2 text-primary-600 dark:text-primary-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"></path>
+              </svg>
+              Create New Alert
+            </h3>
+          </div>
+          
+          <form id="alert-form" class="space-y-4">
+            <div>
+              <label class="form-label">Asset Symbol</label>
+              <input 
+                type="text" 
+                id="asset-symbol" 
+                name="asset_symbol" 
+                class="form-input" 
+                placeholder="e.g., AAPL, bitcoin, BTC"
+                required
+              >
+              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Enter stock symbol or cryptocurrency name</p>
+            </div>
+
+            <div>
+              <label class="form-label">Asset Type</label>
+              <select id="asset-type" name="asset_type" class="form-input">
+                <option value="auto">Auto Detect</option>
+                <option value="stock">Stock</option>
+                <option value="crypto">Cryptocurrency</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="form-label">Condition</label>
+              <select id="condition-type" name="condition_type" class="form-input">
+                <option value=">=">Price rises to or above</option>
+                <option value="<=">Price drops to or below</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="form-label">Target Price ($)</label>
+              <input 
+                type="number" 
+                id="threshold-price" 
+                name="threshold_price" 
+                class="form-input" 
+                placeholder="100.00"
+                step="0.01"
+                min="0"
+                required
+              >
+            </div>
+
+            <button type="submit" class="btn-primary w-full flex items-center justify-center space-x-2">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"></path>
+              </svg>
+              <span>Create Alert</span>
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Alerts List -->
+      <div class="lg:col-span-2">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+              <svg class="w-5 h-5 mr-2 text-primary-600 dark:text-primary-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+              </svg>
+              Active Alerts
+            </h3>
+            <button id="refresh-alerts" class="btn-secondary text-sm px-3 py-1.5">
+              <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"></path>
+              </svg>
+              Refresh
+            </button>
+          </div>
+          
+          <!-- Loading State -->
+          <div id="alerts-loading" class="p-4">
+            <div class="space-y-3">
+              <div class="animate-pulse">
+                <div class="flex items-center space-x-4">
+                  <div class="w-10 h-10 bg-gray-300 dark:bg-gray-600 rounded-lg"></div>
+                  <div class="flex-1 space-y-2">
+                    <div class="h-4 bg-gray-300 dark:bg-gray-600 rounded w-1/4"></div>
+                    <div class="h-3 bg-gray-300 dark:bg-gray-600 rounded w-1/2"></div>
+                  </div>
+                  <div class="w-20 h-6 bg-gray-300 dark:bg-gray-600 rounded"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Alerts Container -->
+          <div id="alerts-container" class="hidden">
+            <!-- Dynamic alerts will be loaded here -->
+          </div>
+          
+          <!-- Empty State -->
+          <div id="no-alerts" class="hidden p-8 text-center">
+            <div class="w-16 h-16 mx-auto bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
+              <svg class="w-8 h-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+              </svg>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No alerts yet</h3>
+            <p class="text-gray-600 dark:text-gray-400 mb-4">Create your first price alert to get started monitoring your investments.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Toast Notifications Container -->
+<div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/icons.js"></script>
+<script src="/static/js/dashboard-v2.js"></script>
+<script>
+  // Initialize theme toggle
+  document.addEventListener('DOMContentLoaded', function() {
+    const themeToggle = document.getElementById('theme-toggle');
+    const darkIcon = document.getElementById('theme-toggle-dark-icon');
+    const lightIcon = document.getElementById('theme-toggle-light-icon');
+    
+    // Check current theme
+    if (localStorage.getItem('theme') === 'dark' || 
+        (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+      lightIcon.classList.remove('hidden');
+    } else {
+      document.documentElement.classList.remove('dark');
+      darkIcon.classList.remove('hidden');
+    }
+    
+    // Toggle theme
+    themeToggle.addEventListener('click', function() {
+      darkIcon.classList.toggle('hidden');
+      lightIcon.classList.toggle('hidden');
+      
+      if (document.documentElement.classList.contains('dark')) {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+      } else {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      }
+    });
+  });
+</script>
+{% endblock %}

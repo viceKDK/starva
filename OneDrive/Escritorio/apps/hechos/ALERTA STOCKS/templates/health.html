@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block title %}System Health Dashboard - Price Monitor{% endblock %}
+
+{% block content %}
+<div class="health-dashboard">
+    <div class="dashboard-header">
+        <h2>🏥 System Health Dashboard</h2>
+        <div class="health-controls">
+            <button id="refresh-btn" class="btn btn-primary">🔄 Refresh</button>
+            <div class="auto-refresh-toggle">
+                <label class="toggle-switch">
+                    <input type="checkbox" id="auto-refresh" checked>
+                    <span class="slider"></span>
+                </label>
+                <span>Auto-refresh (30s)</span>
+            </div>
+            <div class="last-update">
+                Last updated: <span id="last-update-time">Loading...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overall Status Card -->
+    <div class="status-overview">
+        <div class="status-card overall-status" id="overall-status">
+            <div class="status-icon">🔍</div>
+            <div class="status-content">
+                <h3>System Status</h3>
+                <div class="status-value" id="overall-status-value">Checking...</div>
+                <div class="status-details" id="overall-status-details">
+                    Performing health checks...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Component Status Grid -->
+    <div class="components-grid">
+        <div class="component-card" id="database-status">
+            <div class="component-header">
+                <div class="component-icon">🗄️</div>
+                <h4>Database</h4>
+                <div class="status-indicator" id="database-indicator">❓</div>
+            </div>
+            <div class="component-metrics">
+                <div class="metric">
+                    <span class="metric-label">Response Time:</span>
+                    <span class="metric-value" id="database-response-time">-</span>
+                </div>
+                <div class="component-message" id="database-message">Checking...</div>
+            </div>
+        </div>
+
+        <div class="component-card" id="scheduler-status">
+            <div class="component-header">
+                <div class="component-icon">⏰</div>
+                <h4>Price Monitor</h4>
+                <div class="status-indicator" id="scheduler-indicator">❓</div>
+            </div>
+            <div class="component-metrics">
+                <div class="metric">
+                    <span class="metric-label">Next Run:</span>
+                    <span class="metric-value" id="scheduler-next-run">-</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Success Rate:</span>
+                    <span class="metric-value" id="scheduler-success-rate">-</span>
+                </div>
+                <div class="component-message" id="scheduler-message">Checking...</div>
+            </div>
+        </div>
+
+        <div class="component-card" id="whatsapp-status">
+            <div class="component-header">
+                <div class="component-icon">📱</div>
+                <h4>WhatsApp Service</h4>
+                <div class="status-indicator" id="whatsapp-indicator">❓</div>
+            </div>
+            <div class="component-metrics">
+                <div class="metric">
+                    <span class="metric-label">Configuration:</span>
+                    <span class="metric-value" id="whatsapp-config">-</span>
+                </div>
+                <div class="component-message" id="whatsapp-message">Checking...</div>
+            </div>
+        </div>
+
+        <div class="component-card" id="apis-status">
+            <div class="component-header">
+                <div class="component-icon">🌐</div>
+                <h4>External APIs</h4>
+                <div class="status-indicator" id="apis-indicator">❓</div>
+            </div>
+            <div class="component-metrics">
+                <div class="metric">
+                    <span class="metric-label">Response Time:</span>
+                    <span class="metric-value" id="apis-response-time">-</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Alpha Vantage:</span>
+                    <span class="metric-value" id="alpha-vantage-status">-</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">CoinGecko:</span>
+                    <span class="metric-value" id="coingecko-status">-</span>
+                </div>
+                <div class="component-message" id="apis-message">Checking...</div>
+            </div>
+        </div>
+
+        <div class="component-card" id="system-status">
+            <div class="component-header">
+                <div class="component-icon">💻</div>
+                <h4>System Resources</h4>
+                <div class="status-indicator" id="system-indicator">❓</div>
+            </div>
+            <div class="component-metrics">
+                <div class="metric">
+                    <span class="metric-label">CPU Usage:</span>
+                    <span class="metric-value" id="cpu-usage">-</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Memory:</span>
+                    <span class="metric-value" id="memory-usage">-</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Disk:</span>
+                    <span class="metric-value" id="disk-usage">-</span>
+                </div>
+                <div class="component-message" id="system-message">Checking...</div>
+            </div>
+        </div>
+
+        <div class="component-card" id="application-status">
+            <div class="component-header">
+                <div class="component-icon">⚙️</div>
+                <h4>Application</h4>
+                <div class="status-indicator" id="application-indicator">❓</div>
+            </div>
+            <div class="component-metrics">
+                <div class="metric">
+                    <span class="metric-label">Uptime:</span>
+                    <span class="metric-value" id="application-uptime">-</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Startup Valid:</span>
+                    <span class="metric-value" id="startup-validation">-</span>
+                </div>
+                <div class="component-message" id="application-message">Checking...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Health History Section -->
+    <div class="health-history">
+        <h3>📊 Health History</h3>
+        <div class="history-controls">
+            <select id="history-timeframe">
+                <option value="1h">Last Hour</option>
+                <option value="6h">Last 6 Hours</option>
+                <option value="24h" selected>Last 24 Hours</option>
+                <option value="7d">Last 7 Days</option>
+            </select>
+        </div>
+        <div class="history-chart-container">
+            <canvas id="health-history-chart"></canvas>
+        </div>
+    </div>
+
+    <!-- Notification Tracking -->
+    <div class="notification-tracking">
+        <h3>📨 Notification Delivery Tracking</h3>
+        <div class="notification-stats">
+            <div class="stat-card">
+                <div class="stat-value" id="total-notifications">-</div>
+                <div class="stat-label">Total Sent</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="successful-notifications">-</div>
+                <div class="stat-label">Successful</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="failed-notifications">-</div>
+                <div class="stat-label">Failed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="delivery-success-rate">-</div>
+                <div class="stat-label">Success Rate</div>
+            </div>
+        </div>
+        
+        <div class="recent-notifications">
+            <h4>Recent Notifications</h4>
+            <div class="notification-list" id="recent-notifications-list">
+                <div class="loading">Loading notification history...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Log -->
+    <div class="error-log" id="error-log-section" style="display: none;">
+        <h3>⚠️ Recent Issues</h3>
+        <div class="error-list" id="error-list">
+            <!-- Errors will be populated here -->
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loading-overlay">
+    <div class="loading-spinner">
+        <div class="spinner"></div>
+        <div>Refreshing health data...</div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', path='/js/health-dashboard.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}

@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}Data Management - Price Monitor{% endblock %}
+
+{% block content %}
+<div class="data-management">
+    <div class="page-header">
+        <h2>🗄️ Data Management & Backup</h2>
+        <div class="page-controls">
+            <button id="refresh-btn" class="btn btn-primary">🔄 Refresh</button>
+        </div>
+    </div>
+
+    <!-- Database Statistics -->
+    <div class="stats-section">
+        <h3>📊 Database Statistics</h3>
+        <div class="stats-grid" id="database-stats">
+            <div class="stat-card">
+                <div class="stat-icon">📦</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="total-records">-</div>
+                    <div class="stat-label">Total Records</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">💾</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="database-size">-</div>
+                    <div class="stat-label">Database Size</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🗂️</div>
+                <div class="stat-content">
+                    <div class="stat-value" id="table-count">-</div>
+                    <div class="stat-label">Tables</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="table-details" id="table-details">
+            <h4>Table Details</h4>
+            <div class="table-list" id="table-list">
+                <div class="loading">Loading table information...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Backup Management -->
+    <div class="backup-section">
+        <h3>💾 Backup Management</h3>
+        
+        <div class="backup-controls">
+            <div class="backup-actions">
+                <button id="create-backup-btn" class="btn btn-success">📥 Create Backup</button>
+                <button id="cleanup-backups-btn" class="btn btn-warning">🧹 Cleanup Old Backups</button>
+            </div>
+            
+            <div class="backup-options">
+                <label>
+                    <input type="checkbox" id="compress-backup" checked>
+                    Compress backup
+                </label>
+                <select id="backup-type">
+                    <option value="full">Full Backup</option>
+                    <option value="incremental">Incremental Backup</option>
+                    <option value="archive">Archive Backup</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="backup-list-section">
+            <h4>Available Backups</h4>
+            <div class="backup-summary" id="backup-summary">
+                <span class="backup-count">Loading...</span>
+            </div>
+            <div class="backup-list" id="backup-list">
+                <div class="loading">Loading backup list...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Cleanup -->
+    <div class="cleanup-section">
+        <h3>🧹 Data Cleanup</h3>
+        
+        <div class="cleanup-controls">
+            <div class="cleanup-options">
+                <label for="retention-days">Retention Period (days):</label>
+                <input type="number" id="retention-days" value="7" min="1" max="365">
+                <button id="cleanup-data-btn" class="btn btn-warning">🗑️ Cleanup Old Data</button>
+            </div>
+        </div>
+        
+        <div class="retention-policies">
+            <h4>📋 Retention Policies</h4>
+            <div class="policy-grid" id="retention-policies">
+                <div class="loading">Loading retention policies...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Database Maintenance -->
+    <div class="maintenance-section">
+        <h3>🔧 Database Maintenance</h3>
+        
+        <div class="maintenance-controls">
+            <button id="maintenance-btn" class="btn btn-info">⚙️ Run Maintenance</button>
+            <span class="maintenance-info">Includes VACUUM, ANALYZE, and integrity checks</span>
+        </div>
+        
+        <div class="maintenance-results" id="maintenance-results" style="display: none;">
+            <h4>Maintenance Results</h4>
+            <div class="results-content" id="maintenance-content">
+                <!-- Results will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Scheduled Tasks -->
+    <div class="schedule-section">
+        <h3>⏰ Scheduled Tasks</h3>
+        
+        <div class="schedule-status" id="schedule-status">
+            <div class="loading">Loading scheduled tasks...</div>
+        </div>
+        
+        <div class="scheduled-jobs" id="scheduled-jobs">
+            <!-- Job list will be populated here -->
+        </div>
+    </div>
+
+    <!-- Activity Log -->
+    <div class="activity-section">
+        <h3>📝 Recent Activity</h3>
+        <div class="activity-log" id="activity-log">
+            <div class="loading">Loading recent activity...</div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal" id="confirmation-modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modal-title">Confirm Action</h3>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p id="modal-message">Are you sure you want to perform this action?</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-primary" id="modal-confirm-btn">Confirm</button>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loading-overlay" style="display: none;">
+    <div class="loading-spinner">
+        <div class="spinner"></div>
+        <div id="loading-message">Processing...</div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', path='/js/data-management.js') }}"></script>
+{% endblock %}
