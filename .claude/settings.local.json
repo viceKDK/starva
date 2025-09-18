@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(md-tree:*)",
+      "Bash(npx create-expo-app:*)",
+      "Bash(npx expo install:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx expo start:*)",
+      "Bash(timeout 10 npx expo start --no-dev-client)",
+      "Bash(timeout 10 npx expo start)",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(npm run lint)",
+      "Bash(npm run type-check:*)",
+      "Bash(npm test)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
