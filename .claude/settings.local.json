@@ -14,7 +14,11 @@
       "Bash(git commit:*)",
       "Bash(npm run lint)",
       "Bash(npm run type-check:*)",
-      "Bash(npm test)"
+      "Bash(npm test)",
+      "Bash(npx jest:*)",
+      "Bash(tree:*)",
+      "Bash(npm test:*)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []
