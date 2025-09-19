@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { Alert, Linking, Platform } from 'react-native';
 import {
   StartRunTrackingUseCase,
   PauseRunTrackingUseCase,
@@ -195,6 +196,29 @@ export const useRunTrackingController = (
       if (!result.success) {
         setError(getErrorMessage(result.error));
         setGpsStatus(GPSStatus.ERROR);
+        // Offer actionable prompts for common issues
+        if (result.error === 'PERMISSION_DENIED') {
+          Alert.alert(
+            'Location Permission Required',
+            'Please grant location access to track your runs.',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Open Settings', onPress: () => Linking.openSettings() }
+            ]
+          );
+        } else if (result.error === 'GPS_DISABLED') {
+          Alert.alert(
+            'Enable Location Services',
+            Platform.select({
+              ios: 'Turn on Location Services in Settings > Privacy & Security > Location Services.',
+              android: 'Turn on Location in quick settings or device Settings.'
+            }) || 'Turn on Location Services in device settings.',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Open Settings', onPress: () => Linking.openSettings() }
+            ]
+          );
+        }
         setSessionState(RunSessionState.READY);
         return;
       }
@@ -207,6 +231,14 @@ export const useRunTrackingController = (
 
       // Start auto-save interval
       startAutoSave();
+
+      // Seed first location to accelerate leaving ACQUIRING state
+      try {
+        const seed = await gpsService.getCurrentLocation();
+        if (seed.success) {
+          updateGpsStatus(seed.data.accuracy);
+        }
+      } catch {}
 
       // Start a timeout for GPS acquisition
       if (acquireTimeoutRef.current) clearTimeout(acquireTimeoutRef.current);

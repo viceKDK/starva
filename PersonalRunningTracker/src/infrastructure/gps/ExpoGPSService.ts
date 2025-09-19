@@ -135,7 +135,8 @@ export class ExpoGPSService implements IGPSService {
 
       // Get current location with timeout
       const location = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.BestForNavigation,
+        // Balanced improves time-to-first-fix in Expo Go
+        accuracy: Location.Accuracy.Balanced,
         timeInterval: this.GPS_TIMEOUT,
       });
 
@@ -145,6 +146,10 @@ export class ExpoGPSService implements IGPSService {
       if (!validationResult.success) {
         return Err(validationResult.error);
       }
+
+      // Seed internal buffers to accelerate UI leaving "acquiring" state
+      this.trackingPoints.push(gpsPoint);
+      this.lastValidLocation = gpsPoint;
 
       return Ok(gpsPoint);
     } catch (error) {
