@@ -1,0 +1,9 @@
+export enum RunSessionState {
+  READY = 'READY',
+  STARTING = 'STARTING',
+  TRACKING = 'TRACKING',
+  PAUSED = 'PAUSED',
+  STOPPING = 'STOPPING',
+  STOPPED = 'STOPPED'
+}
+
