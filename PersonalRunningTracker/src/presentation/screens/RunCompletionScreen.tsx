@@ -355,9 +355,13 @@ export const RunCompletionScreen: React.FC<Props> = ({ route, navigation }) => {
               const Static = require('@/presentation/components/maps/StaticMapboxImage');
               const StaticMapboxImage = Static.StaticMapboxImage || Static.default;
               return (
-                <StaticMapboxImage points={run.route} width={Math.round(\
-                  require('react-native').Dimensions.get('window').width - 40
-                )} height={240} />
+                <StaticMapboxImage
+                  points={run.route}
+                  width={Math.round(
+                    require('react-native').Dimensions.get('window').width - 40
+                  )}
+                  height={240}
+                />
               );
             })()}
           </View>
