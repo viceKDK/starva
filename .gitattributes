@@ -1,0 +1,27 @@
+* text=auto
+
+# Scripts: enforce platform-appropriate endings
+*.sh  text eol=lf
+*.bash text eol=lf
+*.ps1 text eol=crlf
+*.bat text eol=crlf
+
+# Common text files
+*.md   text
+*.yml  text
+*.yaml text
+*.ts   text
+*.tsx  text
+*.js   text
+*.jsx  text
+*.json text
+
+# Treat images and archives as binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.gz  binary
