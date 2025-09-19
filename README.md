@@ -1,15 +1,10 @@
-﻿# Personal Running Tracker MVP
+# Personal Running Tracker MVP
 
-## Project Status & Roadmap
-
-- Current status and recent changes: docs/project-status.md
-- Roadmap and next steps: docs/roadmap.md
-
-## ðŸƒâ€â™‚ï¸ Overview
+## 🏃‍♂️ Overview
 
 A privacy-first, local-only running tracker for iOS built with React Native and Expo. This app captures GPS routes, tracks running metrics, and stores personal running history entirely on your device without any cloud dependencies or social features.
 
-## ðŸ“± Features
+## 📱 Features
 
 - **GPS Run Tracking**: Real-time location tracking with start/pause/stop functionality
 - **Route Visualization**: Display completed routes on interactive maps
@@ -18,27 +13,27 @@ A privacy-first, local-only running tracker for iOS built with React Native and 
 - **Privacy-First**: All data stays local - no cloud storage or accounts required
 - **Offline Ready**: Works completely offline after initial setup
 
-## ðŸ—ï¸ Architecture
+## 🏗️ Architecture
 
 This project follows **Clean Architecture** principles with strict adherence to **SOLID**, **GRASP**, and **Clean Code** practices.
 
 ### Quick Architecture Overview
 
 ```
-ðŸ“ Presentation Layer    â†’ React Components, Screens, Navigation
-ðŸ“ Application Layer     â†’ Use Cases, Controllers, DTOs
-ðŸ“ Domain Layer         â†’ Entities, Business Logic, Interfaces
-ðŸ“ Infrastructure Layer â†’ Database, GPS, External Services
+📁 Presentation Layer    → React Components, Screens, Navigation
+📁 Application Layer     → Use Cases, Controllers, DTOs
+📁 Domain Layer         → Entities, Business Logic, Interfaces
+📁 Infrastructure Layer → Database, GPS, External Services
 ```
 
-## ðŸ“š Documentation
+## 📚 Documentation
 
 ### Architecture Documentation
 
 | Document | Description | Status |
 |----------|-------------|---------|
-| [**Clean Architecture Guide**](./docs/clean-architecture/index.md) | Complete guide to our clean architecture implementation | âœ… Complete |
-| [**Architecture Overview**](./docs/architecture/index.md) | High-level system architecture and technical decisions | âœ… Complete |
+| [**Clean Architecture Guide**](./docs/clean-architecture/index.md) | Complete guide to our clean architecture implementation | ✅ Complete |
+| [**Architecture Overview**](./docs/architecture/index.md) | High-level system architecture and technical decisions | ✅ Complete |
 
 ### Clean Code Principles
 
@@ -47,7 +42,7 @@ This project follows **Clean Architecture** principles with strict adherence to 
 | [**SOLID Principles**](./docs/clean-architecture/principles/solid-principles.md) | Applied SOLID principles with React Native examples | Single Responsibility, Open/Closed, LSP, ISP, DIP |
 | [**GRASP Principles**](./docs/clean-architecture/principles/grasp-principles.md) | Responsibility assignment patterns | Creator, Expert, Controller, Cohesion, Coupling |
 | [**Result Pattern**](./docs/clean-architecture/patterns/result-pattern.md) | Type-safe error handling without exceptions | Explicit error handling, composability |
-| [**Clean Architecture Layers**](./docs/clean-architecture/layers/clean-architecture-layers.md) | Layer separation and dependency rules | Domain â†’ Application â†’ Infrastructure/Presentation |
+| [**Clean Architecture Layers**](./docs/clean-architecture/layers/clean-architecture-layers.md) | Layer separation and dependency rules | Domain → Application → Infrastructure/Presentation |
 
 ### Development Guidelines
 
@@ -56,7 +51,7 @@ This project follows **Clean Architecture** principles with strict adherence to 
 | [**File Structure**](./docs/clean-architecture/guidelines/file-structure.md) | Modular organization with size limits | Max 500 lines per file, split at 450 |
 | [**Naming Conventions**](./docs/clean-architecture/guidelines/naming-conventions.md) | Intention-revealing, descriptive naming | No generic names, clear purpose |
 
-## ðŸš€ Quick Start
+## 🚀 Quick Start
 
 ### Prerequisites
 
@@ -88,7 +83,7 @@ expo start
 expo run:ios
 ```
 
-## ðŸ› ï¸ Tech Stack
+## 🛠️ Tech Stack
 
 | Category | Technology | Version | Purpose |
 |----------|------------|---------|---------|
@@ -101,7 +96,7 @@ expo run:ios
 | **Testing** | Jest + React Native Testing Library | Latest | Unit and integration testing |
 | **E2E Testing** | Detox | 20.0+ | End-to-end testing |
 
-## ðŸ“ Code Quality Standards
+## 📏 Code Quality Standards
 
 ### File Organization Rules
 - **Maximum file size**: 500 lines (split at 450 lines)
@@ -117,16 +112,16 @@ expo run:ios
 - **Files**: Match content type (PascalCase for components, camelCase for utilities)
 
 ### Architecture Enforcement
-- âœ… Favor composition over inheritance
-- âœ… Use dependency injection for all services
-- âœ… Separate UI from business logic completely
-- âœ… Implement Result Pattern for error handling
-- âœ… Apply design patterns to solve common problems
-- âŒ No business logic in UI components
-- âŒ No hard-coded dependencies
-- âŒ No magic numbers or unclear variable names
+- ✅ Favor composition over inheritance
+- ✅ Use dependency injection for all services
+- ✅ Separate UI from business logic completely
+- ✅ Implement Result Pattern for error handling
+- ✅ Apply design patterns to solve common problems
+- ❌ No business logic in UI components
+- ❌ No hard-coded dependencies
+- ❌ No magic numbers or unclear variable names
 
-## ðŸ›ï¸ Clean Architecture Implementation
+## 🏛️ Clean Architecture Implementation
 
 ### Domain Layer (Core Business Logic)
 ```typescript
@@ -181,7 +176,7 @@ export const RunTrackingScreen: React.FC = () => {
 };
 ```
 
-## ðŸ§ª Testing Strategy
+## 🧪 Testing Strategy
 
 ### Testing Pyramid
 ```
@@ -195,13 +190,13 @@ Unit Tests      Component Tests
 ### Test Organization
 ```
 __tests__/
-â”œâ”€â”€ unit/           # Pure logic tests
-â”œâ”€â”€ integration/    # Service integration tests
-â”œâ”€â”€ components/     # React component tests
-â””â”€â”€ e2e/           # End-to-end user flows
+├── unit/           # Pure logic tests
+├── integration/    # Service integration tests
+├── components/     # React component tests
+└── e2e/           # End-to-end user flows
 ```
 
-## ðŸš€ Development Workflow
+## 🚀 Development Workflow
 
 ### Running Tests
 ```bash
@@ -239,7 +234,7 @@ expo build:ios
 eas build --platform ios
 ```
 
-## ðŸ“Š Project Metrics
+## 📊 Project Metrics
 
 ### Code Organization
 - **Total Files**: ~150 files (average 200 lines each)
@@ -249,11 +244,11 @@ eas build --platform ios
 
 ### Architecture Metrics
 - **Layer Separation**: 100% (no cross-layer violations)
-- **Dependency Direction**: Always inward (Domain â† Application â† Infrastructure/Presentation)
+- **Dependency Direction**: Always inward (Domain ← Application ← Infrastructure/Presentation)
 - **Interface Coverage**: 100% for cross-layer communication
 - **Result Pattern Usage**: 100% for error handling
 
-## ðŸŽ¯ Development Principles
+## 🎯 Development Principles
 
 ### SOLID Principles Applied
 - **S**: Single Responsibility - Each class has one reason to change
@@ -275,7 +270,7 @@ eas build --platform ios
 3. **No Comments**: Code should be self-explanatory
 4. **Error Handling**: Use Result Pattern, not exceptions
 
-## ðŸ”’ Privacy & Security
+## 🔒 Privacy & Security
 
 - **Local-First**: All data remains on device
 - **No Cloud Dependencies**: Zero external data transmission
@@ -283,18 +278,18 @@ eas build --platform ios
 - **No User Accounts**: Single-user, privacy-focused design
 - **No Analytics**: No tracking or data collection
 
-## ðŸš€ Future Enhancements (Post-MVP)
+## 🚀 Future Enhancements (Post-MVP)
 
 - **Data Export**: GPX/CSV export functionality
 - **Apple Watch**: Basic run control from watch
 - **Route Planning**: Pre-planned route navigation
 - **Advanced Analytics**: Trend analysis and insights
 
-## ðŸ“„ License
+## 📄 License
 
 MIT License - See [LICENSE](./LICENSE) file for details.
 
-## ðŸ¤ Contributing
+## 🤝 Contributing
 
 This is a personal project, but contributions are welcome! Please ensure all contributions follow our clean architecture principles and code quality standards.
 
@@ -306,5 +301,4 @@ This is a personal project, but contributions are welcome! Please ensure all con
 
 ---
 
-*Built with â¤ï¸ using Clean Architecture, SOLID principles, and privacy-first design.*
-
+*Built with ❤️ using Clean Architecture, SOLID principles, and privacy-first design.*
