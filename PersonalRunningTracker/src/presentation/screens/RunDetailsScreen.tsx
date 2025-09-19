@@ -15,6 +15,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
 // Centralized map implementation (Apple today; switch here via maps/index)
 import { CurrentRouteMap } from '@/presentation/components/maps';
+import RouteLivePreview from '@/presentation/components/maps/RouteLivePreview';
 
 import { RootStackParamList } from '@/shared/types';
 import { Run, GPSPoint } from '@/domain/entities';
@@ -167,10 +168,24 @@ interface RouteMapProps {
 }
 
 const RouteMap: React.FC<RouteMapProps> = ({ gpsPoints }) => {
+  const [showLive, setShowLive] = React.useState(false);
   return (
     <View style={styles.mapContainer}>
       <Text style={styles.sectionTitle}>Route Map</Text>
       <CurrentRouteMap points={gpsPoints} enableAnimation={true} />
+
+      <View style={styles.mapActions}>
+        <TouchableOpacity style={styles.liveButton} onPress={() => setShowLive(true)}>
+          <Ionicons name="play" size={16} color="#fff" />
+          <Text style={styles.liveButtonText}>Ver recorrido en vivo</Text>
+        </TouchableOpacity>
+      </View>
+
+      {showLive && (
+        <View style={styles.livePreviewWrapper}>
+          <RouteLivePreview points={gpsPoints} onClose={() => setShowLive(false)} />
+        </View>
+      )}
 
       <View style={styles.mapStats}>
         <View style={styles.mapStat}>
@@ -670,6 +685,29 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f9fa',
     padding: 16,
     borderRadius: 8
+  },
+  mapActions: {
+    marginTop: 8,
+    marginBottom: 8,
+    alignItems: 'flex-start'
+  },
+  liveButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#2196F3',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 6
+  },
+  liveButtonText: {
+    color: '#fff',
+    marginLeft: 6,
+    fontSize: 14,
+    fontWeight: '600'
+  },
+  livePreviewWrapper: {
+    marginTop: 8,
+    marginBottom: 8
   },
   mapStat: {
     alignItems: 'center'
