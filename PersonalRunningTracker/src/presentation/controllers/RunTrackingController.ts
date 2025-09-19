@@ -194,6 +194,7 @@ export const useRunTrackingController = (
       const result = await useCases.startUseCase.execute();
       if (!result.success) {
         setError(getErrorMessage(result.error));
+        setGpsStatus(GPSStatus.ERROR);
         setSessionState(RunSessionState.READY);
         return;
       }

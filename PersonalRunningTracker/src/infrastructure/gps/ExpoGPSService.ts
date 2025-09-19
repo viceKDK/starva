@@ -14,7 +14,7 @@ export class ExpoGPSService implements IGPSService {
 
   // Configuration constants
   private readonly GPS_TIMEOUT = 10000; // 10 seconds
-  private readonly MAX_ACCURACY_THRESHOLD = 50; // 50 meters
+  private readonly MAX_ACCURACY_THRESHOLD = 100; // tolerate up to 100m to allow initial fix
   private readonly MIN_TIME_INTERVAL = 1000; // 1 second
   private readonly MIN_DISTANCE_INTERVAL = 5; // 5 meters
   private readonly MAX_SPEED_THRESHOLD = 50; // 50 km/h
@@ -47,7 +47,8 @@ export class ExpoGPSService implements IGPSService {
       // Start location tracking
       this.subscription = await Location.watchPositionAsync(
         {
-          accuracy: Location.Accuracy.BestForNavigation,
+          // Balanced improves time-to-first-fix in Expo Go; we can raise later
+          accuracy: Location.Accuracy.Balanced,
           timeInterval: this.MIN_TIME_INTERVAL,
           distanceInterval: this.MIN_DISTANCE_INTERVAL,
         },
@@ -212,8 +213,8 @@ export class ExpoGPSService implements IGPSService {
   }
 
   private validateGPSPoint(point: GPSPoint): Result<GPSPoint, GPSError> {
-    // Check basic validity
-    if (!point.latitude || !point.longitude) {
+    // Check basic validity (explicit numeric checks; allow 0 values)
+    if (!Number.isFinite(point.latitude) || !Number.isFinite(point.longitude)) {
       return Err('INVALID_LOCATION');
     }
 
@@ -228,7 +229,7 @@ export class ExpoGPSService implements IGPSService {
     }
 
     // Check accuracy threshold
-    if (point.accuracy && point.accuracy > this.MAX_ACCURACY_THRESHOLD) {
+    if (typeof point.accuracy === 'number' && point.accuracy > this.MAX_ACCURACY_THRESHOLD) {
       return Err('ACCURACY_TOO_LOW');
     }
 
