@@ -18,7 +18,8 @@
       "Bash(npx jest:*)",
       "Bash(tree:*)",
       "Bash(npm test:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Read(//c/Users/vicen/OneDrive/Escritorio/apps/por hacer/**)"
     ],
     "deny": [],
     "ask": []
