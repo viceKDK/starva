@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+﻿import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import MapView, { Polyline, Marker } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
@@ -92,7 +92,7 @@ export const AppleRouteMap: React.FC<RouteMapProps> = ({ points, enableAnimation
         <View style={styles.mapActions}>
           <TouchableOpacity style={styles.animateButton} onPress={() => (animating ? stopAnimation() : startAnimation())}>
             <Ionicons name={animating ? 'pause' : 'play'} size={16} color="#fff" />
-            <Text style={styles.animateButtonText}>{animating ? 'Detener animación' : 'Ver recorrido'}</Text>
+            <Text style={styles.animateButtonText}>{animating ? 'Detener animacion' : 'Ver recorrido'}</Text>
           </TouchableOpacity>
         </View>
       )}
