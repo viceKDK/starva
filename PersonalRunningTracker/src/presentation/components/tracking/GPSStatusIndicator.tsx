@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { View, Text, StyleSheet, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { GPSStatus } from '../../controllers/RunTrackingController';
@@ -93,8 +93,8 @@ export const GPSStatusIndicator: React.FC<GPSStatusIndicatorProps> = ({
         <View style={styles.infoRow}>
           <Text style={styles.infoText}>
             {Platform.OS === 'ios'
-              ? 'Using Apple Core Location • Waiting for first fix'
-              : 'Using Google Fused Location • Waiting for first fix'}
+              ? 'Using Apple Core Location â€¢ Waiting for first fix'
+              : 'Using Google Fused Location â€¢ Waiting for first fix'}
           </Text>
           <Text style={styles.hintText}>Move to open sky if this takes > 10s</Text>
         </View>
@@ -194,3 +194,4 @@ const styles = StyleSheet.create({
     marginTop: 2
   }
 });
+
