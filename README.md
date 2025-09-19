@@ -1,5 +1,10 @@
 # Personal Running Tracker MVP
 
+## Project Status & Roadmap
+
+- Current status and recent changes: docs/project-status.md
+- Roadmap and next steps: docs/roadmap.md
+
 ## 🏃‍♂️ Overview
 
 A privacy-first, local-only running tracker for iOS built with React Native and Expo. This app captures GPS routes, tracks running metrics, and stores personal running history entirely on your device without any cloud dependencies or social features.
