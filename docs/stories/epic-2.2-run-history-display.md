@@ -49,7 +49,7 @@ so that I can track my progress and find specific runs easily.
 
 ### 6. Data Management
 - [x] Pull-to-refresh updates run list from database
-- [ ] Run deletion with confirmation dialog
+- [x] Run deletion with confirmation dialog
 - [ ] Bulk selection mode for multiple run management
 - [ ] Data export options (prepare for future GPX export)
 

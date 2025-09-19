@@ -15,22 +15,22 @@ so that I can visualize where I ran and analyze my route choices.
 
 ### 1. Map Component Integration
 - [ ] react-native-maps integrated with proper iOS configuration
-- [ ] Map component displays correctly in run details screen
-- [ ] Map renders within 3 seconds for typical routes
-- [ ] Proper error handling for map loading failures
-- [ ] Fallback display when maps are unavailable
+- [x] Map component displays correctly in run details screen (static preview in Expo Go)
+- [x] Map renders within 3 seconds for typical routes (static preview)
+- [x] Proper error handling for map loading failures / fallbacks
+- [x] Fallback display when maps are unavailable (Expo Go static image)
 
 ### 2. GPS Route Visualization
-- [ ] Complete GPS route drawn as colored polyline
+- [x] Complete GPS route drawn as colored polyline (orange)
 - [ ] Route color customizable (default: orange/red)
-- [ ] Line thickness appropriate for readability (4-6px)
-- [ ] Route segments connected properly without gaps
-- [ ] Start and finish points marked with distinct markers
+- [x] Line thickness appropriate for readability (4-6px)
+- [x] Route segments connected properly without gaps
+- [x] Start and finish points marked with distinct markers
 
 ### 3. Map Region and Zoom
-- [ ] Map automatically centers on route with optimal zoom
-- [ ] Route fits completely within view with comfortable padding
-- [ ] Map region calculated from GPS bounds (min/max lat/lng)
+- [x] Map automatically centers on route with optimal zoom (static preview)
+- [x] Route fits completely within view with comfortable padding
+- [x] Map region calculated from GPS bounds (min/max lat/lng)
 - [ ] User can zoom and pan to explore route details
 - [ ] Reset zoom button returns to optimal route view
 
@@ -63,11 +63,11 @@ so that I can visualize where I ran and analyze my route choices.
 - [ ] Invalid GPS points filtered out
 
 ### 8. Error Handling and Edge Cases
-- [ ] No GPS data scenarios handled with appropriate message
-- [ ] Map service failures handled gracefully
-- [ ] Very short routes (under 100m) displayed properly
+- [x] No GPS data scenarios handled with appropriate message
+- [x] Map service failures handled gracefully
+- [x] Very short routes (under 100m) displayed properly
 - [ ] Routes with significant gaps shown correctly
-- [ ] Corrupt GPS data filtered and user notified
+- [x] Corrupt GPS data filtered and user notified
 
 ## Implementation Details
 
