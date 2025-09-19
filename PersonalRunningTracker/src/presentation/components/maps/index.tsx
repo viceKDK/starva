@@ -1,4 +1,4 @@
-// Central switch for map implementation used by the app.
+﻿// Central switch for map implementation used by the app.
 // Primary: expo-maps (Apple Maps on iOS) when available in a dev build.
 // Fallback for Expo Go: StaticMapboxImage (or OSM static image) without native modules.
 import React from 'react';
@@ -13,7 +13,7 @@ export const CurrentRouteMap: React.FC<RouteMapProps> = ({ points }) => {
     // Probe require; if it throws, we'll go to fallback
     require('expo-maps');
     return <ExpoAppleRouteMap points={points} enableAnimation={false} />;
-  } catch {
+  } catch (e) {
     const width = Math.round(Dimensions.get('window').width - 32);
     const height = 200;
     return <StaticMapboxImage points={points} width={width} height={height} />;
