@@ -230,7 +230,11 @@ export class ExpoGPSService implements IGPSService {
 
     // Check accuracy threshold
     if (typeof point.accuracy === 'number' && point.accuracy > this.MAX_ACCURACY_THRESHOLD) {
-      return Err('ACCURACY_TOO_LOW');
+      // Allow the very first point even if accuracy is poor to exit "acquiring" state;
+      // subsequent points will improve accuracy and validation will apply normally.
+      if (this.lastValidLocation) {
+        return Err('ACCURACY_TOO_LOW');
+      }
     }
 
     // Check for unrealistic speed (if we have a previous point)

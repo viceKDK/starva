@@ -501,7 +501,9 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: '#ffffff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0'
+    borderBottomColor: '#e0e0e0',
+    zIndex: 10,
+    position: 'relative'
   },
   searchContainer: {
     flexDirection: 'row',
@@ -537,10 +539,8 @@ const styles = StyleSheet.create({
     flex: 1
   },
   sortOptionsContainer: {
-    position: 'absolute',
-    top: 76,
-    left: 16,
-    right: 16,
+    // Render inline so list items don't overlap; keep shadows for popup feel
+    marginTop: 8,
     backgroundColor: '#ffffff',
     borderRadius: 8,
     borderWidth: 1,
@@ -549,8 +549,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 4,
-    zIndex: 1000
+    elevation: 4
   },
   sortOption: {
     flexDirection: 'row',
