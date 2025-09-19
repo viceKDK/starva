@@ -181,20 +181,20 @@ export const RunCompletionScreen: React.FC<Props> = ({ route, navigation }) => {
 
         if (hasRecords || hasAchievements) {
           let title = '';
-          let message = ${runName} has been saved to your run history.\n\n;
+          let message = `${runName} has been saved to your run history.\n\n`;
 
           if (hasRecords && hasAchievements) {
-          if (hasRecords && hasAchievements) {
             title = 'Records & Achievements Unlocked!';
+            const recordTitles = newRecords.map(record => record.getDisplayTitle()).join(', ');
             const achievementTitles = newAchievements.map(achievement => achievement.title).join(', ');
-            message += Personal Records: \n\nAchievements: ;
-          } else if (hasRecords) {
+            message += `Personal Records: ${recordTitles}\n\nAchievements: ${achievementTitles}`;
           } else if (hasRecords) {
             title = 'Personal Records Achieved!';
+            const recordTitles = newRecords.map(record => record.getDisplayTitle()).join(', ');
             message += `New Records: ${recordTitles}`;
           } else if (hasAchievements) {
-          } else if (hasAchievements) {
             title = 'Achievements Unlocked!';
+            const achievementTitles = newAchievements.map(achievement => achievement.title).join(', ');
             message += `New Achievements: ${achievementTitles}`;
           }
 
