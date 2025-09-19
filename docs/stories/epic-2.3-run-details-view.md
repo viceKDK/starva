@@ -14,31 +14,31 @@ so that I can analyze my performance and review my running route.
 ## Acceptance Criteria
 
 ### 1. Run Details Header
-- [ ] Run name displayed prominently with edit capability
-- [ ] Run date and time formatted clearly
+- [x] Run name displayed prominently with edit capability
+- [x] Run date and time formatted clearly
 - [ ] Weather conditions display (if available from device)
-- [ ] Run notes section with edit functionality
-- [ ] Share button for basic run statistics
+- [x] Run notes section with edit functionality
+- [x] Share button for basic run statistics
 
 ### 2. Key Metrics Display
-- [ ] Large, prominent display of primary metrics
-- [ ] Total distance in kilometers (2 decimal places)
-- [ ] Total duration in HH:MM:SS format
-- [ ] Average pace in MM:SS per kilometer
+- [x] Large, prominent display of primary metrics
+- [x] Total distance in kilometers (2 decimal places)
+- [x] Total duration in HH:MM:SS format
+- [x] Average pace in MM:SS per kilometer
 - [ ] Elevation gain/loss (if GPS provides altitude data)
-- [ ] Calories burned estimate based on distance and pace
+- [x] Calories burned estimate based on distance and pace
 
 ### 3. Route Map Visualization
-- [ ] Interactive map showing complete GPS route
-- [ ] Route path drawn as colored line on map
-- [ ] Start and finish markers clearly indicated
-- [ ] Map centered on route with appropriate zoom level
+- [x] Interactive map showing complete GPS route
+- [x] Route path drawn as colored line on map
+- [x] Start and finish markers clearly indicated
+- [x] Map centered on route with appropriate zoom level
 - [ ] Satellite/street view toggle options
 
 ### 4. Pace Analysis Section
 - [ ] Pace graph showing speed variations throughout run
-- [ ] Kilometer split times displayed in table format
-- [ ] Fastest and slowest kilometer highlighted
+- [x] Kilometer split times displayed in table format
+- [x] Fastest and slowest kilometer highlighted
 - [ ] Moving average pace calculation and display
 - [ ] Pace zone analysis (if pace zones defined)
 
@@ -55,8 +55,8 @@ so that I can analyze my performance and review my running route.
 - [ ] Save route as favorite (for future reference)
 
 ### 7. Run Management Actions
-- [ ] Edit run name and notes functionality
-- [ ] Delete run with confirmation dialog
+- [x] Edit run name and notes functionality
+- [x] Delete run with confirmation dialog
 - [ ] Duplicate run for template usage
 - [ ] Mark run as personal record (if applicable)
 
