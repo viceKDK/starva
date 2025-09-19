@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -181,20 +181,20 @@ export const RunCompletionScreen: React.FC<Props> = ({ route, navigation }) => {
 
         if (hasRecords || hasAchievements) {
           let title = '';
-          let message = `"${runName}" has been saved to your run history.\n\n`;
+          let message = ${runName} has been saved to your run history.\n\n;
 
           if (hasRecords && hasAchievements) {
-            title = '🏆 Records & Achievements Unlocked!';
-            const recordTitles = newRecords.map(record => record.getDisplayTitle()).join(', ');
+          if (hasRecords && hasAchievements) {
+            title = 'Records & Achievements Unlocked!';
             const achievementTitles = newAchievements.map(achievement => achievement.title).join(', ');
-            message += `Personal Records: ${recordTitles}\n\nAchievements: ${achievementTitles}`;
+            message += Personal Records: \n\nAchievements: ;
           } else if (hasRecords) {
-            title = '🏆 Personal Records Achieved!';
-            const recordTitles = newRecords.map(record => record.getDisplayTitle()).join(', ');
+          } else if (hasRecords) {
+            title = 'Personal Records Achieved!';
             message += `New Records: ${recordTitles}`;
           } else if (hasAchievements) {
-            title = '🎉 Achievements Unlocked!';
-            const achievementTitles = newAchievements.map(achievement => achievement.title).join(', ');
+          } else if (hasAchievements) {
+            title = 'Achievements Unlocked!';
             message += `New Achievements: ${achievementTitles}`;
           }
 
