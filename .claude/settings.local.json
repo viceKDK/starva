@@ -19,7 +19,8 @@
       "Bash(tree:*)",
       "Bash(npm test:*)",
       "Bash(git push:*)",
-      "Read(//c/Users/vicen/OneDrive/Escritorio/apps/por hacer/**)"
+      "Read(//c/Users/vicen/OneDrive/Escritorio/apps/por hacer/**)",
+      "Bash(npm start)"
     ],
     "deny": [],
     "ask": []
