@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { RootTabScreenProps } from '@/shared/types';
@@ -302,6 +303,15 @@ export const HistoryScreen: React.FC<Props> = ({ navigation }) => {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  // Refresh list when screen regains focus (e.g., after deleting a run in details)
+  useFocusEffect(
+    useCallback(() => {
+      // Refresh silently without showing loader
+      loadData();
+      return () => {};
+    }, [loadData])
+  );
 
   const handleRunPress = useCallback((run: Run) => {
     navigation.navigate('RunDetail', { runId: run.id });
