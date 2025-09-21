@@ -1,0 +1,37 @@
+src/presentation/components/tracking/MetricsDisplay.tsx(29,5): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/presentation/components/tracking/MetricsDisplay.tsx(36,5): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/presentation/screens/AchievementsScreen.tsx(93,9): error TS6133: 'achievementsByDifficulty' is declared but its value is never read.
+src/presentation/screens/AchievementsScreen.tsx(183,25): error TS2769: No overload matches this call.
+  Argument of type '["Tracking"]' is not assignable to parameter of type '[screen: "Settings", params?: undefined, options?: { merge?: boolean; pop?: boolean; }] | [screen: "MainTabs", params: { screen?: keyof RootTabParamList; }, options?: { merge?: boolean; pop?: boolean; }] | [screen: "RunDetail", params: { ...; }, options?: { ...; }] | [screen: ...] | [screen: ...]'.
+    Type '["Tracking"]' is not assignable to type '[screen: "Settings", params?: undefined, options?: { merge?: boolean; pop?: boolean; }] | [screen: "Achievements", params?: undefined, options?: { merge?: boolean; pop?: boolean; }]'.
+      Type '["Tracking"]' is not assignable to type '[screen: "Achievements", params?: undefined, options?: { merge?: boolean; pop?: boolean; }]'.
+        Type at position 0 in source is not compatible with type at position 0 in target.
+          Type '"Tracking"' is not assignable to type '"Achievements"'.
+  Overload 2 of 2, '(options: { name: "Settings"; params: undefined; path?: string; merge?: boolean; pop?: boolean; } | { name: "MainTabs"; params: { screen?: keyof RootTabParamList; }; path?: string; merge?: boolean; pop?: boolean; } | { ...; } | { ...; } | { ...; }): void', gave the following error.
+    Argument of type 'string' is not assignable to parameter of type '{ name: "Settings"; params: undefined; path?: string; merge?: boolean; pop?: boolean; } | { name: "MainTabs"; params: { screen?: keyof RootTabParamList; }; path?: string; merge?: boolean; pop?: boolean; } | { ...; } | { ...; } | { ...; }'.
+src/presentation/screens/AchievementsScreen.tsx(237,14): error TS2375: Type '{ totalAchievements: number; latestAchievement: Achievement | undefined; }' is not assignable to type 'StatsHeaderProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'latestAchievement' are incompatible.
+    Type 'Achievement | undefined' is not assignable to type 'Achievement'.
+      Type 'undefined' is not assignable to type 'Achievement'.
+src/presentation/screens/HistoryScreen.tsx(509,25): error TS6133: 'data' is declared but its value is never read.
+src/presentation/screens/PersonalRecordsScreen.tsx(21,84): error TS2344: Type '"PersonalRecords"' does not satisfy the constraint 'keyof RootStackParamList'.
+src/presentation/screens/PersonalRecordsScreen.tsx(181,25): error TS2769: No overload matches this call.
+  Argument of type '["Tracking"]' is not assignable to parameter of type '[screen: "Settings", params?: undefined, options?: { merge?: boolean; pop?: boolean; }] | [screen: "MainTabs", params: { screen?: keyof RootTabParamList; }, options?: { merge?: boolean; pop?: boolean; }] | [screen: "RunDetail", params: { ...; }, options?: { ...; }] | [screen: ...] | [screen: ...]'.
+    Type '["Tracking"]' is not assignable to type '[screen: "Settings", params?: undefined, options?: { merge?: boolean; pop?: boolean; }] | [screen: "Achievements", params?: undefined, options?: { merge?: boolean; pop?: boolean; }]'.
+      Type '["Tracking"]' is not assignable to type '[screen: "Achievements", params?: undefined, options?: { merge?: boolean; pop?: boolean; }]'.
+        Type at position 0 in source is not compatible with type at position 0 in target.
+          Type '"Tracking"' is not assignable to type '"Achievements"'.
+  Overload 2 of 2, '(options: { name: "Settings"; params: undefined; path?: string; merge?: boolean; pop?: boolean; } | { name: "MainTabs"; params: { screen?: keyof RootTabParamList; }; path?: string; merge?: boolean; pop?: boolean; } | { ...; } | { ...; } | { ...; }): void', gave the following error.
+    Argument of type 'string' is not assignable to parameter of type '{ name: "Settings"; params: undefined; path?: string; merge?: boolean; pop?: boolean; } | { name: "MainTabs"; params: { screen?: keyof RootTabParamList; }; path?: string; merge?: boolean; pop?: boolean; } | { ...; } | { ...; } | { ...; }'.
+src/presentation/screens/PersonalRecordsScreen.tsx(238,14): error TS2375: Type '{ totalRecords: number; latestRecord: PersonalRecord | undefined; onViewAchievements: () => void; }' is not assignable to type 'StatsHeaderProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'latestRecord' are incompatible.
+    Type 'PersonalRecord | undefined' is not assignable to type 'PersonalRecord'.
+      Type 'undefined' is not assignable to type 'PersonalRecord'.
+src/presentation/screens/RunCompletionScreen.tsx(23,1): error TS6133: 'SQLitePersonalRecordRepository' is declared but its value is never read.
+src/presentation/screens/RunCompletionScreen.tsx(24,1): error TS6133: 'SQLiteAchievementRepository' is declared but its value is never read.
+src/presentation/screens/RunCompletionScreen.tsx(75,10): error TS6133: 'personalRecords' is declared but its value is never read.
+src/presentation/screens/RunCompletionScreen.tsx(76,10): error TS6133: 'achievements' is declared but its value is never read.
+src/presentation/screens/SettingsScreen.tsx(81,49): error TS6133: 'navigation' is declared but its value is never read.
+src/shared/types/navigation.ts(4,1): error TS6133: 'StopTrackingResult' is declared but its value is never read.

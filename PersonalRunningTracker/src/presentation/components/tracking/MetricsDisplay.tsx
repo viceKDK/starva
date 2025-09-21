@@ -26,14 +26,16 @@ export const MetricsDisplay: React.FC<MetricsDisplayProps> = ({
   };
 
   const getFormattedDistance = (): string => {
-    return formatDistance(metrics.distance).split(' ')[0]; // Just the number, we'll add unit in the label
+    const parts = formatDistance(metrics.distance).split(' ');
+    return (parts[0] ?? ''); // Just the number, we'll add unit in the label
   };
 
   const getFormattedPace = (): string => {
-    if (metrics.averagePace === 0 || !isFinite(metrics.averagePace)) {
+    if (metrics.pace === 0 || !isFinite(metrics.pace)) {
       return '--:--';
     }
-    return formatPace(metrics.averagePace).split(' ')[0]; // Just the pace, we'll add unit in the label
+    const parts = formatPace(metrics.pace).split(' ');
+    return (parts[0] ?? ''); // Just the pace, we'll add unit in the label
   };
 
   const formatSpeed = (metersPerSecond: number): string => {
@@ -51,12 +53,12 @@ export const MetricsDisplay: React.FC<MetricsDisplayProps> = ({
       <View style={styles.secondaryMetrics}>
         <View style={styles.metricItem}>
           <Text style={styles.secondaryValue}>{getFormattedDistance()}</Text>
-          <Text style={styles.secondaryLabel}>{getDistanceUnit()}</Text>
+          <Text style={styles.secondaryLabel}>{getDistanceUnit() ?? ''}</Text>
         </View>
 
         <View style={styles.metricItem}>
           <Text style={styles.secondaryValue}>{getFormattedPace()}</Text>
-          <Text style={styles.secondaryLabel}>{getPaceLabel()}</Text>
+          <Text style={styles.secondaryLabel}>{getPaceLabel() ?? ''}</Text>
         </View>
 
         <View style={styles.metricItem}>

@@ -30,7 +30,7 @@ export const AppleRouteMap: React.FC<RouteMapProps> = ({ points, enableAnimation
   const coords = useMemo(() => points.map(p => ({ latitude: p.latitude, longitude: p.longitude })), [points]);
 
   useEffect(() => {
-    setAnimatedCoords(coords.length ? [coords[0]] : []);
+    setAnimatedCoords(coords.length ? [coords[0]!] : []);
     indexRef.current = 1;
     if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
     setAnimating(false);
@@ -46,7 +46,7 @@ export const AppleRouteMap: React.FC<RouteMapProps> = ({ points, enableAnimation
   const startAnimation = () => {
     if (coords.length < 2) return;
     if (timerRef.current) clearTimeout(timerRef.current);
-    setAnimatedCoords([coords[0]]);
+    setAnimatedCoords([coords[0]!]);
     indexRef.current = 1;
     setAnimating(true);
 
@@ -55,8 +55,8 @@ export const AppleRouteMap: React.FC<RouteMapProps> = ({ points, enableAnimation
       const i = indexRef.current;
       if (i >= coords.length) { stopAnimation(); return; }
       setAnimatedCoords(prev => [...prev, coords[i]]);
-      const t1 = points[i - 1].timestamp.getTime();
-      const t2 = points[i].timestamp.getTime();
+      const t1 = points[i - 1]!.timestamp.getTime();
+      const t2 = points[i]!.timestamp.getTime();
       const delay = Math.max(50, Math.floor(Math.max(0, t2 - t1) / SPEED));
       indexRef.current = i + 1;
       timerRef.current = setTimeout(step, delay);
@@ -83,8 +83,8 @@ export const AppleRouteMap: React.FC<RouteMapProps> = ({ points, enableAnimation
           {animatedCoords.length > 1 && (
             <Polyline coordinates={animatedCoords} strokeColor="#2196F3" strokeWidth={5} lineJoin="round" lineCap="round" />
           )}
-          <Marker coordinate={coords[0]} title="Start" pinColor="#4CAF50" />
-          <Marker coordinate={coords[coords.length - 1]} title="Finish" pinColor="#F44336" />
+          <Marker coordinate={coords[0]!} title="Start" pinColor="#4CAF50" />
+          <Marker coordinate={coords[coords.length - 1]!} title="Finish" pinColor="#F44336" />
         </MapView>
       </View>
 

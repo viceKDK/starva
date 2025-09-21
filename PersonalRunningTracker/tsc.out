@@ -1,0 +1,228 @@
+src/application/services/AchievementDetectionService.ts(1,23): error TS6133: 'AchievementType' is declared but its value is never read.
+src/application/services/AchievementDetectionService.ts(71,29): error TS18048: 'allRunsResult.data' is possibly 'undefined'.
+src/application/services/AchievementDetectionService.ts(107,23): error TS18048: 'allRunsResult.data' is possibly 'undefined'.
+src/application/services/AchievementDetectionService.ts(172,24): error TS18048: 'allRunsResult.data' is possibly 'undefined'.
+src/application/services/AchievementDetectionService.ts(215,27): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/application/services/AchievementDetectionService.ts(216,24): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/application/services/AchievementDetectionService.ts(218,22): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/application/services/AchievementDetectionService.ts(228,26): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/application/services/DataIntegrityService.ts(71,28): error TS2551: Property 'value' does not exist on type 'string'. Did you mean 'valueOf'?
+src/application/services/DataIntegrityService.ts(86,26): error TS2551: Property 'value' does not exist on type 'string'. Did you mean 'valueOf'?
+src/application/services/DataIntegrityService.ts(122,23): error TS18048: 'runs' is possibly 'undefined'.
+src/application/services/DataIntegrityService.ts(193,21): error TS18048: 'runs' is possibly 'undefined'.
+src/application/services/DataIntegrityService.ts(193,40): error TS2551: Property 'value' does not exist on type 'string'. Did you mean 'valueOf'?
+src/application/services/DataIntegrityService.ts(200,27): error TS18048: 'runs' is possibly 'undefined'.
+src/application/services/GPSDataValidationService.ts(84,33): error TS2322: Type 'GPSPoint | undefined' is not assignable to type 'GPSPoint'.
+  Type 'undefined' is not assignable to type 'GPSPoint'.
+src/application/services/GPSDataValidationService.ts(90,47): error TS2345: Argument of type 'GPSPoint | undefined' is not assignable to parameter of type 'GPSPoint'.
+  Type 'undefined' is not assignable to type 'GPSPoint'.
+src/application/services/GPSDataValidationService.ts(91,25): error TS18048: 'currentPoint' is possibly 'undefined'.
+src/application/services/GPSDataValidationService.ts(91,60): error TS18048: 'previousPoint' is possibly 'undefined'.
+src/application/services/GPSDataValidationService.ts(98,23): error TS2345: Argument of type 'GPSPoint | undefined' is not assignable to parameter of type 'GPSPoint'.
+  Type 'undefined' is not assignable to type 'GPSPoint'.
+src/application/services/GPSDataValidationService.ts(102,13): error TS18048: 'currentPoint' is possibly 'undefined'.
+src/application/services/GPSDataValidationService.ts(102,46): error TS18048: 'previousPoint' is possibly 'undefined'.
+src/application/services/GPSDataValidationService.ts(103,15): error TS18048: 'currentPoint' is possibly 'undefined'.
+src/application/services/GPSDataValidationService.ts(103,40): error TS18048: 'previousPoint' is possibly 'undefined'.
+src/application/services/GPSDataValidationService.ts(104,13): error TS2322: Type 'GPSPoint | undefined' is not assignable to type 'GPSPoint'.
+  Type 'undefined' is not assignable to type 'GPSPoint'.
+src/application/services/GPSDataValidationService.ts(107,23): error TS2345: Argument of type 'GPSPoint | undefined' is not assignable to parameter of type 'GPSPoint'.
+  Type 'undefined' is not assignable to type 'GPSPoint'.
+src/application/services/GPSDataValidationService.ts(118,33): error TS2322: Type 'GPSPoint | undefined' is not assignable to type 'GPSPoint'.
+  Type 'undefined' is not assignable to type 'GPSPoint'.
+src/application/services/GPSDataValidationService.ts(126,28): error TS18048: 'previousPoint' is possibly 'undefined'.
+src/application/services/GPSDataValidationService.ts(126,53): error TS18048: 'nextPoint' is possibly 'undefined'.
+src/application/services/GPSDataValidationService.ts(127,28): error TS18048: 'previousPoint' is possibly 'undefined'.
+src/application/services/GPSDataValidationService.ts(127,54): error TS18048: 'nextPoint' is possibly 'undefined'.
+src/application/services/GPSDataValidationService.ts(132,20): error TS18048: 'currentPoint' is possibly 'undefined'.
+src/application/services/GPSDataValidationService.ts(133,19): error TS18048: 'currentPoint' is possibly 'undefined'.
+src/application/services/GPSDataValidationService.ts(134,19): error TS18048: 'currentPoint' is possibly 'undefined'.
+src/application/services/GPSDataValidationService.ts(137,59): error TS2345: Argument of type 'GPSPoint | undefined' is not assignable to parameter of type 'GPSPoint'.
+  Type 'undefined' is not assignable to type 'GPSPoint'.
+src/application/services/GPSDataValidationService.ts(141,21): error TS2345: Argument of type 'GPSPoint | undefined' is not assignable to parameter of type 'GPSPoint'.
+  Type 'undefined' is not assignable to type 'GPSPoint'.
+src/application/services/GPSDataValidationService.ts(147,19): error TS2345: Argument of type 'GPSPoint | undefined' is not assignable to parameter of type 'GPSPoint'.
+  Type 'undefined' is not assignable to type 'GPSPoint'.
+src/application/services/RunDataValidationService.ts(174,71): error TS6133: 'errors' is declared but its value is never read.
+src/application/services/RunDataValidationService.ts(177,24): error TS2532: Object is possibly 'undefined'.
+src/application/services/RunDataValidationService.ts(178,23): error TS2532: Object is possibly 'undefined'.
+src/application/services/RunDataValidationService.ts(191,11): error TS2532: Object is possibly 'undefined'.
+src/application/services/RunDataValidationService.ts(191,33): error TS2532: Object is possibly 'undefined'.
+src/application/services/RunDataValidationService.ts(228,25): error TS2532: Object is possibly 'undefined'.
+src/application/services/RunDataValidationService.ts(228,56): error TS2532: Object is possibly 'undefined'.
+src/application/services/RunDataValidationService.ts(235,56): error TS6133: 'errors' is declared but its value is never read.
+src/application/services/RunDataValidationService.ts(260,47): error TS2345: Argument of type 'GPSPoint | undefined' is not assignable to parameter of type 'GPSPoint'.
+  Type 'undefined' is not assignable to type 'GPSPoint'.
+src/application/usecases/DataIntegrityCheckUseCase.ts(10,23): error TS6138: Property 'runRepository' is declared but its value is never read.
+src/application/usecases/GetAllRunsUseCase.ts(82,7): error TS18048: 'run.notes' is possibly 'undefined'.
+src/application/usecases/SaveRunUseCase.ts(49,13): error TS2375: Type '{ name: string; notes: string | undefined; id: string; startTime: Date; endTime: Date; duration: number; distance: number; averagePace: number; route: GPSPoint[]; createdAt: Date; }' is not assignable to type 'Run' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'notes' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/application/usecases/SaveRunUseCase.ts(100,9): error TS2375: Type 'Result<void, DatabaseError>' is not assignable to type 'Result<SaveRunResult, DatabaseError>' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Type 'Result<void, DatabaseError>' is not assignable to type '{ success: false; data?: never; error: DatabaseError; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Types of property 'success' are incompatible.
+      Type 'boolean' is not assignable to type 'false'.
+src/application/usecases/UpdateRunUseCase.ts(30,13): error TS2375: Type '{ name: string; notes: string | undefined; id: string; startTime: Date; endTime: Date; duration: number; distance: number; averagePace: number; route: GPSPoint[]; createdAt: Date; }' is not assignable to type 'Run' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'notes' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/domain/entities/index.ts(4,1): error TS2308: Module './PersonalRecord' has already exported a member named 'RunId'. Consider explicitly re-exporting to resolve the ambiguity.
+src/domain/entities/RunSession.ts(49,11): error TS2564: Property 'stateTransitionRules' has no initializer and is not definitely assigned in the constructor.
+src/domain/entities/RunSession.ts(103,24): error TS1354: 'readonly' type modifier is only permitted on array and tuple literal types.
+src/domain/factories/AchievementFactory.ts(1,23): error TS6133: 'AchievementId' is declared but its value is never read.
+src/domain/factories/AchievementFactory.ts(26,7): error TS2693: 'AchievementId' only refers to a type, but is being used as a value here.
+src/domain/factories/AchievementFactory.ts(30,7): error TS2559: Type 'number' has no properties in common with type 'AchievementCriteria'.
+src/domain/factories/AchievementFactory.ts(40,7): error TS2322: Type '"distance"' is not assignable to type 'AchievementType'.
+src/domain/factories/AchievementFactory.ts(50,7): error TS2820: Type '"consistency"' is not assignable to type 'AchievementType'. Did you mean '"CONSISTENCY"'?
+src/domain/factories/AchievementFactory.ts(60,7): error TS2820: Type '"volume"' is not assignable to type 'AchievementType'. Did you mean '"VOLUME"'?
+src/domain/factories/AchievementFactory.ts(70,7): error TS2820: Type '"frequency"' is not assignable to type 'AchievementType'. Did you mean '"FREQUENCY"'?
+src/domain/factories/AchievementFactory.ts(84,7): error TS2820: Type '"speed"' is not assignable to type 'AchievementType'. Did you mean '"SPEED"'?
+src/domain/factories/AchievementFactory.ts(96,9): error TS2322: Type '"distance"' is not assignable to type 'AchievementType'.
+src/domain/factories/AchievementFactory.ts(103,9): error TS2322: Type '"distance"' is not assignable to type 'AchievementType'.
+src/domain/factories/AchievementFactory.ts(110,9): error TS2322: Type '"distance"' is not assignable to type 'AchievementType'.
+src/domain/factories/AchievementFactory.ts(117,9): error TS2322: Type '"distance"' is not assignable to type 'AchievementType'.
+src/domain/factories/AchievementFactory.ts(124,9): error TS2322: Type '"distance"' is not assignable to type 'AchievementType'.
+src/domain/factories/AchievementFactory.ts(133,9): error TS2820: Type '"consistency"' is not assignable to type 'AchievementType'. Did you mean '"CONSISTENCY"'?
+src/domain/factories/AchievementFactory.ts(140,9): error TS2820: Type '"consistency"' is not assignable to type 'AchievementType'. Did you mean '"CONSISTENCY"'?
+src/domain/factories/AchievementFactory.ts(147,9): error TS2820: Type '"consistency"' is not assignable to type 'AchievementType'. Did you mean '"CONSISTENCY"'?
+src/domain/factories/AchievementFactory.ts(156,9): error TS2820: Type '"volume"' is not assignable to type 'AchievementType'. Did you mean '"VOLUME"'?
+src/domain/factories/AchievementFactory.ts(163,9): error TS2820: Type '"volume"' is not assignable to type 'AchievementType'. Did you mean '"VOLUME"'?
+src/domain/factories/AchievementFactory.ts(172,9): error TS2820: Type '"frequency"' is not assignable to type 'AchievementType'. Did you mean '"FREQUENCY"'?
+src/domain/factories/AchievementFactory.ts(176,26): error TS6133: 'run' is declared but its value is never read.
+src/domain/factories/AchievementFactory.ts(179,9): error TS2820: Type '"frequency"' is not assignable to type 'AchievementType'. Did you mean '"FREQUENCY"'?
+src/domain/factories/AchievementFactory.ts(183,26): error TS6133: 'run' is declared but its value is never read.
+src/domain/factories/AchievementFactory.ts(186,9): error TS2820: Type '"frequency"' is not assignable to type 'AchievementType'. Did you mean '"FREQUENCY"'?
+src/domain/factories/AchievementFactory.ts(190,26): error TS6133: 'run' is declared but its value is never read.
+src/domain/factories/AchievementFactory.ts(195,9): error TS2820: Type '"speed"' is not assignable to type 'AchievementType'. Did you mean '"SPEED"'?
+src/domain/factories/AchievementFactory.ts(202,9): error TS2820: Type '"speed"' is not assignable to type 'AchievementType'. Did you mean '"SPEED"'?
+src/domain/factories/AchievementFactory.ts(218,44): error TS2339: Property 'value' does not exist on type 'Achievement'.
+src/domain/factories/AchievementFactory.ts(237,11): error TS2322: Type 'string' is not assignable to type 'RunId'.
+src/domain/factories/AchievementFactory.ts(256,22): error TS2551: Property 'value' does not exist on type 'string'. Did you mean 'valueOf'?
+src/domain/factories/AchievementFactory.ts(256,39): error TS2551: Property 'value' does not exist on type 'string'. Did you mean 'valueOf'?
+src/domain/factories/AchievementFactory.ts(292,7): error TS2322: Type '"distance"' is not assignable to type 'AchievementType'.
+src/domain/factories/AchievementFactory.ts(296,14): error TS2693: 'RunId' only refers to a type, but is being used as a value here.
+src/domain/factories/PersonalRecordFactory.ts(1,26): error TS6133: 'PersonalRecordId' is declared but its value is never read.
+src/domain/factories/PersonalRecordFactory.ts(25,7): error TS2693: 'PersonalRecordId' only refers to a type, but is being used as a value here.
+src/domain/factories/PersonalRecordFactory.ts(48,7): error TS2322: Type 'string' is not assignable to type 'RunId'.
+src/domain/factories/PersonalRecordFactory.ts(105,12): error TS2678: Type '"1K"' is not comparable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(107,12): error TS2678: Type '"5K"' is not comparable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(109,12): error TS2678: Type '"10K"' is not comparable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(111,12): error TS2678: Type '"half_marathon"' is not comparable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(113,12): error TS2678: Type '"marathon"' is not comparable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(115,12): error TS2678: Type '"longest_run"' is not comparable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(117,12): error TS2678: Type '"fastest_pace"' is not comparable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(119,12): error TS2678: Type '"longest_duration"' is not comparable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(156,5): error TS2375: Type '{ category: RecordCategory; currentValue: number; isNewRecord: boolean; improvement: number | undefined; improvementPercentage: number | undefined; }' is not assignable to type 'RecordAnalysis' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'improvement' are incompatible.
+    Type 'number | undefined' is not assignable to type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
+src/domain/factories/PersonalRecordFactory.ts(171,47): error TS2322: Type '"1K"' is not assignable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(171,53): error TS2322: Type '"5K"' is not assignable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(171,59): error TS2322: Type '"10K"' is not assignable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(171,66): error TS2322: Type '"half_marathon"' is not assignable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(171,83): error TS2322: Type '"marathon"' is not assignable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(171,95): error TS2322: Type '"fastest_pace"' is not assignable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(186,47): error TS2322: Type '"1K"' is not assignable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(186,53): error TS2322: Type '"5K"' is not assignable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(186,59): error TS2322: Type '"10K"' is not assignable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(186,66): error TS2322: Type '"half_marathon"' is not assignable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(186,83): error TS2322: Type '"marathon"' is not assignable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(186,95): error TS2322: Type '"fastest_pace"' is not assignable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(199,7): error TS2322: Type '"1K"' is not assignable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(200,7): error TS2322: Type '"5K"' is not assignable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(201,7): error TS2322: Type '"10K"' is not assignable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(202,7): error TS2322: Type '"half_marathon"' is not assignable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(203,7): error TS2322: Type '"marathon"' is not assignable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(204,7): error TS2322: Type '"longest_run"' is not assignable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(205,7): error TS2322: Type '"fastest_pace"' is not assignable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(206,7): error TS2820: Type '"longest_duration"' is not assignable to type 'RecordCategory'. Did you mean '"LONGEST_DURATION"'?
+src/domain/factories/PersonalRecordFactory.ts(212,7): error TS2322: Type '"5K"' is not assignable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(214,14): error TS2693: 'RunId' only refers to a type, but is being used as a value here.
+src/domain/factories/PersonalRecordFactory.ts(223,43): error TS2322: Type '"1K"' is not assignable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(223,49): error TS2322: Type '"5K"' is not assignable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(223,55): error TS2322: Type '"10K"' is not assignable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(223,62): error TS2322: Type '"longest_run"' is not assignable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(223,77): error TS2322: Type '"fastest_pace"' is not assignable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(228,54): error TS2345: Argument of type 'RecordCategory | undefined' is not assignable to parameter of type 'RecordCategory'.
+  Type 'undefined' is not assignable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(231,42): error TS2379: Argument of type '{ category: RecordCategory | undefined; value: number; achievedAt: Date; }' is not assignable to parameter of type 'Partial<CreatePersonalRecordOptions>' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'category' are incompatible.
+    Type 'RecordCategory | undefined' is not assignable to type 'RecordCategory'.
+      Type 'undefined' is not assignable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(243,12): error TS2678: Type '"1K"' is not comparable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(244,12): error TS2678: Type '"5K"' is not comparable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(245,12): error TS2678: Type '"10K"' is not comparable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(246,12): error TS2678: Type '"half_marathon"' is not comparable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(247,12): error TS2678: Type '"marathon"' is not comparable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(248,12): error TS2678: Type '"longest_run"' is not comparable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(249,12): error TS2678: Type '"fastest_pace"' is not comparable to type 'RecordCategory'.
+src/domain/factories/PersonalRecordFactory.ts(250,12): error TS2678: Type '"longest_duration"' is not comparable to type 'RecordCategory'.
+src/domain/factories/RunFactory.ts(30,11): error TS2375: Type '{ id: string; name: string; startTime: Date; endTime: Date; distance: number; duration: number; averagePace: number; route: GPSPoint[]; notes: string | undefined; createdAt: Date; }' is not assignable to type 'Run' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'notes' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/domain/factories/RunFactory.ts(57,24): error TS2379: Argument of type '{ startTime: Date; endTime: Date; route: GPSPoint[]; name: string | undefined; notes: string | undefined; }' is not assignable to parameter of type 'CreateRunOptions' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'name' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/domain/index.ts(2,1): error TS2308: Module './entities' has already exported a member named 'RunId'. Consider explicitly re-exporting to resolve the ambiguity.
+src/domain/repositories/IUserPreferencesRepository.ts(1,10): error TS6133: 'UserPreferences' is declared but its value is never read.
+src/infrastructure/maps/MapboxProvider.ts(191,31): error TS2532: Object is possibly 'undefined'.
+src/infrastructure/maps/MapboxProvider.ts(191,61): error TS2532: Object is possibly 'undefined'.
+src/infrastructure/maps/MapboxProvider.ts(197,57): error TS18048: 'end' is possibly 'undefined'.
+src/infrastructure/maps/MapboxProvider.ts(197,82): error TS18048: 'end' is possibly 'undefined'.
+src/infrastructure/persistence/SQLiteAchievementRepository.ts(1,1): error TS6133: 'SQLite' is declared but its value is never read.
+src/infrastructure/persistence/SQLitePersonalRecordRepository.ts(1,1): error TS6133: 'SQLite' is declared but its value is never read.
+src/presentation/components/maps/index.tsx(15,13): error TS2375: Type '{ points: GPSPoint[]; enableAnimation: false; mapType: "standard" | "satellite" | undefined; }' is not assignable to type 'RouteMapProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'mapType' are incompatible.
+    Type '"standard" | "satellite" | undefined' is not assignable to type '"standard" | "satellite"'.
+      Type 'undefined' is not assignable to type '"standard" | "satellite"'.
+src/presentation/components/maps/RouteLivePreview.tsx(63,16): error TS2532: Object is possibly 'undefined'.
+src/presentation/components/maps/RouteLivePreview.tsx(64,16): error TS2532: Object is possibly 'undefined'.
+src/presentation/components/maps/StaticMapboxImage.tsx(5,1): error TS6133: 'MapboxProvider' is declared but its value is never read.
+src/presentation/components/tracking/MetricsDisplay.tsx(29,5): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/presentation/components/tracking/MetricsDisplay.tsx(33,17): error TS2339: Property 'averagePace' does not exist on type 'RunMetrics'.
+src/presentation/components/tracking/MetricsDisplay.tsx(33,56): error TS2339: Property 'averagePace' does not exist on type 'RunMetrics'.
+src/presentation/components/tracking/MetricsDisplay.tsx(36,5): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/presentation/components/tracking/MetricsDisplay.tsx(36,31): error TS2339: Property 'averagePace' does not exist on type 'RunMetrics'.
+src/presentation/navigation/AppNavigator.tsx(103,13): error TS2353: Object literal may only specify known properties, and 'headerBackTitleVisible' does not exist in type 'StackNavigationOptions | ((props: { route: RouteProp<RootStackParamList, "RunCompletion">; navigation: StackNavigationProp<RootStackParamList, "RunCompletion", undefined>; theme: Theme; }) => StackNavigationOptions)'.
+src/presentation/navigation/AppNavigator.tsx(111,13): error TS2353: Object literal may only specify known properties, and 'headerBackTitleVisible' does not exist in type 'StackNavigationOptions | ((props: { route: RouteProp<RootStackParamList, "RunDetail">; navigation: StackNavigationProp<RootStackParamList, "RunDetail", undefined>; theme: Theme; }) => StackNavigationOptions)'.
+src/presentation/navigation/AppNavigator.tsx(119,13): error TS2353: Object literal may only specify known properties, and 'headerBackTitleVisible' does not exist in type 'StackNavigationOptions | ((props: { route: RouteProp<RootStackParamList, "Achievements">; navigation: StackNavigationProp<RootStackParamList, "Achievements", undefined>; theme: Theme; }) => StackNavigationOptions)'.
+src/presentation/screens/AchievementsScreen.tsx(93,9): error TS6133: 'achievementsByDifficulty' is declared but its value is never read.
+src/presentation/screens/AchievementsScreen.tsx(183,25): error TS2769: No overload matches this call.
+  Argument of type '["Tracking"]' is not assignable to parameter of type '[screen: "Settings", params?: undefined, options?: { merge?: boolean; pop?: boolean; }] | [screen: "MainTabs", params: { screen?: keyof RootTabParamList; }, options?: { merge?: boolean; pop?: boolean; }] | [screen: "RunDetail", params: { ...; }, options?: { ...; }] | [screen: ...] | [screen: ...]'.
+    Type '["Tracking"]' is not assignable to type '[screen: "Settings", params?: undefined, options?: { merge?: boolean; pop?: boolean; }] | [screen: "Achievements", params?: undefined, options?: { merge?: boolean; pop?: boolean; }]'.
+      Type '["Tracking"]' is not assignable to type '[screen: "Achievements", params?: undefined, options?: { merge?: boolean; pop?: boolean; }]'.
+        Type at position 0 in source is not compatible with type at position 0 in target.
+          Type '"Tracking"' is not assignable to type '"Achievements"'.
+  Overload 2 of 2, '(options: { name: "Settings"; params: undefined; path?: string; merge?: boolean; pop?: boolean; } | { name: "MainTabs"; params: { screen?: keyof RootTabParamList; }; path?: string; merge?: boolean; pop?: boolean; } | { ...; } | { ...; } | { ...; }): void', gave the following error.
+    Argument of type 'string' is not assignable to parameter of type '{ name: "Settings"; params: undefined; path?: string; merge?: boolean; pop?: boolean; } | { name: "MainTabs"; params: { screen?: keyof RootTabParamList; }; path?: string; merge?: boolean; pop?: boolean; } | { ...; } | { ...; } | { ...; }'.
+src/presentation/screens/AchievementsScreen.tsx(237,14): error TS2375: Type '{ totalAchievements: number; latestAchievement: Achievement | undefined; }' is not assignable to type 'StatsHeaderProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'latestAchievement' are incompatible.
+    Type 'Achievement | undefined' is not assignable to type 'Achievement'.
+      Type 'undefined' is not assignable to type 'Achievement'.
+src/presentation/screens/HistoryScreen.tsx(509,25): error TS6133: 'data' is declared but its value is never read.
+src/presentation/screens/PersonalRecordsScreen.tsx(21,84): error TS2344: Type '"PersonalRecords"' does not satisfy the constraint 'keyof RootStackParamList'.
+src/presentation/screens/PersonalRecordsScreen.tsx(181,25): error TS2769: No overload matches this call.
+  Argument of type '["Tracking"]' is not assignable to parameter of type '[screen: "Settings", params?: undefined, options?: { merge?: boolean; pop?: boolean; }] | [screen: "MainTabs", params: { screen?: keyof RootTabParamList; }, options?: { merge?: boolean; pop?: boolean; }] | [screen: "RunDetail", params: { ...; }, options?: { ...; }] | [screen: ...] | [screen: ...]'.
+    Type '["Tracking"]' is not assignable to type '[screen: "Settings", params?: undefined, options?: { merge?: boolean; pop?: boolean; }] | [screen: "Achievements", params?: undefined, options?: { merge?: boolean; pop?: boolean; }]'.
+      Type '["Tracking"]' is not assignable to type '[screen: "Achievements", params?: undefined, options?: { merge?: boolean; pop?: boolean; }]'.
+        Type at position 0 in source is not compatible with type at position 0 in target.
+          Type '"Tracking"' is not assignable to type '"Achievements"'.
+  Overload 2 of 2, '(options: { name: "Settings"; params: undefined; path?: string; merge?: boolean; pop?: boolean; } | { name: "MainTabs"; params: { screen?: keyof RootTabParamList; }; path?: string; merge?: boolean; pop?: boolean; } | { ...; } | { ...; } | { ...; }): void', gave the following error.
+    Argument of type 'string' is not assignable to parameter of type '{ name: "Settings"; params: undefined; path?: string; merge?: boolean; pop?: boolean; } | { name: "MainTabs"; params: { screen?: keyof RootTabParamList; }; path?: string; merge?: boolean; pop?: boolean; } | { ...; } | { ...; } | { ...; }'.
+src/presentation/screens/PersonalRecordsScreen.tsx(238,14): error TS2375: Type '{ totalRecords: number; latestRecord: PersonalRecord | undefined; onViewAchievements: () => void; }' is not assignable to type 'StatsHeaderProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'latestRecord' are incompatible.
+    Type 'PersonalRecord | undefined' is not assignable to type 'PersonalRecord'.
+      Type 'undefined' is not assignable to type 'PersonalRecord'.
+src/presentation/screens/RunCompletionScreen.tsx(75,10): error TS6133: 'personalRecords' is declared but its value is never read.
+src/presentation/screens/RunCompletionScreen.tsx(76,10): error TS6133: 'achievements' is declared but its value is never read.
+src/presentation/screens/SettingsScreen.tsx(81,49): error TS6133: 'navigation' is declared but its value is never read.
+src/shared/types/navigation.ts(4,1): error TS6133: 'StopTrackingResult' is declared but its value is never read.

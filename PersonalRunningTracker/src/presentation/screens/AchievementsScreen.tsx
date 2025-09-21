@@ -17,7 +17,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { RootStackParamList } from '@/shared/types';
 import { Achievement } from '@/domain/entities/Achievement';
 import { GetAllAchievementsUseCase } from '@/application/usecases/GetAllAchievementsUseCase';
+import { GetAchievementsProgressUseCase } from '@/application/usecases/GetAchievementsProgressUseCase';
 import { SQLiteAchievementRepository } from '@/infrastructure/persistence/SQLiteAchievementRepository';
+import { SQLiteRunRepository } from '@/infrastructure/persistence/SQLiteRunRepository';
+import * as Clipboard from 'expo-clipboard';
 
 type AchievementsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Achievements'>;
 
@@ -29,9 +32,10 @@ interface AchievementItemProps {
   achievement: Achievement;
   onPress: () => void;
   onShare: () => void;
+  onCopy: () => void;
 }
 
-const AchievementItem: React.FC<AchievementItemProps> = ({ achievement, onPress, onShare }) => {
+const AchievementItem: React.FC<AchievementItemProps> = ({ achievement, onPress, onShare, onCopy }) => {
   const difficultyColors = {
     Easy: '#4CAF50',
     Medium: '#FF9800',
@@ -59,9 +63,17 @@ const AchievementItem: React.FC<AchievementItemProps> = ({ achievement, onPress,
         <View style={[styles.difficultyBadge, { backgroundColor: difficultyColor }]}>
           <Text style={styles.difficultyText}>{difficulty}</Text>
         </View>
-        <TouchableOpacity style={styles.shareButton} onPress={onShare}>
-          <Ionicons name="share-outline" size={20} color="#666" />
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row' }}>
+          <TouchableOpacity style={styles.shareButton} onPress={onCopy}>
+            <Ionicons name="copy-outline" size={20} color="#666" />
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.shareButton, { marginLeft: 8 }]} onPress={onShare}>
+            <Ionicons name="share-outline" size={20} color="#666" />
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.shareButton, { marginLeft: 8 }]} onPress={onCopy}>
+            <Ionicons name="image-outline" size={20} color="#666" />
+          </TouchableOpacity>
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -90,17 +102,6 @@ interface StatsHeaderProps {
 }
 
 const StatsHeader: React.FC<StatsHeaderProps> = ({ totalAchievements, latestAchievement }) => {
-  const achievementsByDifficulty = useMemo(() => {
-    // This would need to be calculated from all achievements
-    // For now, we'll just show placeholder data
-    return {
-      Easy: 0,
-      Medium: 0,
-      Hard: 0,
-      Epic: 0
-    };
-  }, []);
-
   return (
     <View style={styles.statsHeader}>
       <View style={styles.statItem}>
@@ -122,12 +123,33 @@ export const AchievementsScreen: React.FC<Props> = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState<'ALL' | 'DISTANCE_MILESTONE' | 'VOLUME' | 'FREQUENCY' | 'SPEED' | 'CONSISTENCY'>('ALL');
+  const [progressItems, setProgressItems] = useState<{
+    key: string;
+    title: string;
+    detail: string;
+    progress: number;
+    current: number;
+    target: number;
+    unit: string;
+  }[]>([]);
+  const [shareCardAchievement, setShareCardAchievement] = useState<Achievement | null>(null);
+  const viewShotRef = React.useRef<ViewShot>(null);
 
   // Initialize use case
   const getAllAchievementsUseCase = useMemo(
     () => new GetAllAchievementsUseCase(new SQLiteAchievementRepository()),
     []
   );
+  const getAchievementsProgressUseCase = useMemo(
+    () => new GetAchievementsProgressUseCase(new SQLiteRunRepository(), new SQLiteAchievementRepository()),
+    []
+  );
+  // Lazy import to avoid circulars in header
+  const backfillAchievementsUseCase = useMemo(() => {
+    const { BackfillAchievementsUseCase } = require('@/application/usecases/BackfillAchievementsUseCase');
+    return new BackfillAchievementsUseCase(new SQLiteRunRepository(), new SQLiteAchievementRepository());
+  }, []);
 
   useEffect(() => {
     loadAchievements();
@@ -141,7 +163,20 @@ export const AchievementsScreen: React.FC<Props> = ({ navigation }) => {
       const result = await getAllAchievementsUseCase.execute();
 
       if (result.success) {
-        setAchievements(result.data);
+        if (result.data.length === 0) {
+          const backfill = await backfillAchievementsUseCase.execute();
+          if (!backfill.success) {
+            console.error('Achievements backfill failed:', backfill.error);
+          }
+          const reload = await getAllAchievementsUseCase.execute();
+          setAchievements(reload.success ? reload.data : []);
+        } else {
+          setAchievements(result.data);
+        }
+        const prog = await getAchievementsProgressUseCase.execute();
+        if (prog.success) {
+          setProgressItems(prog.data);
+        }
       } else {
         setError('Failed to load achievements');
         Alert.alert('Error', 'Failed to load achievements');
@@ -179,9 +214,32 @@ export const AchievementsScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  const handleStartRun = () => {
-    navigation.navigate('Tracking');
+  const handleCopy = async (achievement: Achievement) => {
+    try {
+      await Clipboard.setStringAsync(achievement.getShareText());
+      Alert.alert('Copied', 'Achievement text copied to clipboard');
+    } catch (error) {
+      console.error('Failed to copy achievement:', error);
+    }
   };
+
+  const handleExportImage = async (achievement: Achievement) => {
+    try {
+      setShareCardAchievement(achievement);
+      await new Promise(r => setTimeout(r, 50));
+      const uri = await viewShotRef.current?.capture?.({ format: 'png', quality: 1 });
+      if (uri) {
+        await Share.share({ url: uri, title: achievement.title, message: achievement.title });
+      }
+    } catch (error) {
+      console.error('Failed to export achievement image:', error);
+      Alert.alert('Export Failed', 'Could not generate image');
+    } finally {
+      setShareCardAchievement(null);
+    }
+  };
+
+  // handled inline in ListEmptyComponent
 
   const latestAchievement = achievements.length > 0 ? achievements[0] : undefined;
 
@@ -210,15 +268,18 @@ export const AchievementsScreen: React.FC<Props> = ({ navigation }) => {
     );
   }
 
+  const filtered = achievements.filter(a => filter === 'ALL' ? true : a.type === filter);
+
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
-        data={achievements}
+        data={filtered}
         renderItem={({ item }) => (
           <AchievementItem
             achievement={item}
             onPress={() => handleAchievementPress(item)}
             onShare={() => handleShare(item)}
+            onCopy={() => handleExportImage(item)}
           />
         )}
         keyExtractor={(item) => item.id.value}
@@ -233,15 +294,94 @@ export const AchievementsScreen: React.FC<Props> = ({ navigation }) => {
           />
         }
         ListHeaderComponent={
-          achievements.length > 0 ? (
+          <>
             <StatsHeader
-              totalAchievements={achievements.length}
-              latestAchievement={latestAchievement}
+              totalAchievements={filtered.length}
+              {...(latestAchievement ? { latestAchievement } : {})}
             />
-          ) : null
+            <View style={styles.actionsRow}>
+              <TouchableOpacity style={[styles.actionButton, styles.actionSecondary]} onPress={async () => {
+                const lines = achievements.map(a => `• ${a.title} — ${a.description}${a.getFormattedDate() ? ` (Earned on ${a.getFormattedDate()})` : ''}`);
+                const text = `Achievements Summary\n\n${lines.join('\n')}`;
+                await Clipboard.setStringAsync(text);
+                Alert.alert('Copied', 'Achievements summary copied to clipboard');
+              }}>
+                <Ionicons name="copy-outline" size={16} color="#FF6B35" />
+                <Text style={styles.actionSecondaryText}>Copy Summary</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.actionButton, styles.actionPrimary]} onPress={async () => {
+                const lines = achievements.map(a => `• ${a.title} — ${a.description}${a.getFormattedDate() ? ` (Earned on ${a.getFormattedDate()})` : ''}`);
+                const text = `Achievements Summary\n\n${lines.join('\n')}`;
+                await Share.share({ message: text, title: 'Achievements Summary' });
+              }}>
+                <Ionicons name="share-outline" size={16} color="#fff" />
+                <Text style={styles.actionPrimaryText}>Export Summary</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.filterRow}>
+              {[
+                { key: 'ALL', label: 'All' },
+                { key: 'DISTANCE_MILESTONE', label: 'Distance' },
+                { key: 'VOLUME', label: 'Volume' },
+                { key: 'FREQUENCY', label: 'Frequency' },
+                { key: 'SPEED', label: 'Speed' },
+                { key: 'CONSISTENCY', label: 'Streaks' }
+              ].map(opt => (
+                <TouchableOpacity
+                  key={opt.key}
+                  onPress={() => setFilter(opt.key as any)}
+                  style={[styles.filterChip, filter === (opt.key as any) && styles.filterChipActive]}
+                >
+                  <Text style={[styles.filterChipText, filter === (opt.key as any) && styles.filterChipTextActive]}>
+                    {opt.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {progressItems.length > 0 && (
+              <View style={styles.progressSection}>
+                <Text style={styles.progressTitle}>Progress</Text>
+                {progressItems.map(item => (
+                  <View key={item.key} style={styles.progressItem}>
+                    <View style={styles.progressHeaderRow}>
+                      <Text style={styles.progressLabel}>{item.title}</Text>
+                      <Text style={styles.progressPercent}>{Math.round(item.progress * 100)}%</Text>
+                    </View>
+                    <View style={styles.progressBarTrack}>
+                      <View style={[styles.progressBarFill, { width: `${Math.min(item.progress * 100, 100)}%` }]} />
+                    </View>
+                    <Text style={styles.progressSubtext}>{item.detail} • {item.current}{item.unit} / {item.target}{item.unit}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+          </>
         }
-        ListEmptyComponent={<EmptyState onStartRun={handleStartRun} />}
+        ListEmptyComponent={<EmptyState onStartRun={() => navigation.navigate('MainTabs', { screen: 'Tracking' })} />}
       />
+
+      {shareCardAchievement && (
+        <ViewShot ref={viewShotRef} options={{ format: 'png', quality: 1 }} style={styles.viewShotContainer}>
+          <View style={styles.cardContainer}>
+            <View style={styles.cardHeader}>
+              <Ionicons name="medal-outline" size={20} color="#FF6B35" />
+              <Text style={styles.cardTitle}>Achievement Unlocked</Text>
+            </View>
+            <View style={styles.cardBody}>
+              <View style={[styles.cardIconCircle, { backgroundColor: shareCardAchievement.getColor() + '20' }]}>
+                <Ionicons name={shareCardAchievement.getIconName() as any} size={42} color={shareCardAchievement.getColor()} />
+              </View>
+              <Text style={styles.cardAchievementTitle}>{shareCardAchievement.title}</Text>
+              <Text style={styles.cardAchievementDesc}>{shareCardAchievement.description}</Text>
+              <Text style={styles.cardFooterText}>{shareCardAchievement.getFormattedDate()}</Text>
+            </View>
+            <View style={styles.cardBranding}>
+              <Text style={styles.cardBrandingText}>PersonalRunningTracker</Text>
+            </View>
+          </View>
+        </ViewShot>
+      )}
     </SafeAreaView>
   );
 };
@@ -380,6 +520,138 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     backgroundColor: '#f8f9fa'
   },
+  filterRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 16
+  },
+  filterChip: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: '#f0f1f3'
+  },
+  filterChipActive: {
+    backgroundColor: '#FF6B35'
+  },
+  filterChipText: {
+    color: '#333',
+    fontSize: 12,
+    fontWeight: '600'
+  },
+  filterChipTextActive: {
+    color: '#fff'
+  },
+  progressSection: {
+    backgroundColor: '#f8f9fa',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20
+  },
+  progressTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#333',
+    marginBottom: 12
+  },
+  progressItem: {
+    marginBottom: 12
+  },
+  progressHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6
+  },
+  progressLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333'
+  },
+  progressPercent: {
+    fontSize: 12,
+    color: '#666'
+  },
+  progressBarTrack: {
+    height: 8,
+    backgroundColor: '#eaecef',
+    borderRadius: 6,
+    overflow: 'hidden'
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: '#FF6B35'
+  },
+  progressSubtext: {
+    marginTop: 6,
+    fontSize: 12,
+    color: '#666'
+  },
+  viewShotContainer: {
+    position: 'absolute',
+    left: -1000,
+    top: -1000,
+    width: 600,
+    height: 600,
+    backgroundColor: '#f8f9fa',
+    padding: 24
+  },
+  cardContainer: {
+    flex: 1,
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 16,
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: '#eee'
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#FF6B35'
+  },
+  cardBody: {
+    alignItems: 'center',
+    paddingHorizontal: 12
+  },
+  cardIconCircle: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12
+  },
+  cardAchievementTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 6
+  },
+  cardAchievementDesc: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 6
+  },
+  cardFooterText: {
+    fontSize: 12,
+    color: '#999'
+  },
+  cardBranding: {
+    alignItems: 'center'
+  },
+  cardBrandingText: {
+    fontSize: 12,
+    color: '#aaa'
+  }
   emptyState: {
     flex: 1,
     justifyContent: 'center',

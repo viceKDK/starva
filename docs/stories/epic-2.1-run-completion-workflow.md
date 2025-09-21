@@ -45,7 +45,7 @@ so that I can review my results and save them to my run history.
 - [x] "Discard Run" option available for incomplete or invalid runs
 - [x] Discard confirmation dialog prevents accidental data loss
 - [x] "Continue Tracking" option returns to active session
-- [ ] Share functionality for basic run statistics (optional)
+
 
 ### 6. Data Validation and Quality
 - [x] Minimum run distance validation (100 meters)

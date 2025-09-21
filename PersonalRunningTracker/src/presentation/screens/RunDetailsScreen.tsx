@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 // Centralized map implementation (Apple today; switch here via maps/index)
 import { CurrentRouteMap } from '@/presentation/components/maps';
 import RouteLivePreview from '@/presentation/components/maps/RouteLivePreview';
+import PaceChartComponent from '@/presentation/components/PaceChartComponent';
 
 import { RootStackParamList } from '@/shared/types';
 import { Run, GPSPoint } from '@/domain/entities';
@@ -119,7 +120,7 @@ const MetricsGrid: React.FC<MetricsGridProps> = ({ run }) => {
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  const estimateCalories = (distanceKm: number, durationMinutes: number): number => {
+  const estimateCalories = (distanceKm: number, _durationMinutes: number): number => {
     // Simple estimation: ~60 calories per km for average runner
     return Math.round(distanceKm * 60);
   };
@@ -147,6 +148,23 @@ const MetricsGrid: React.FC<MetricsGridProps> = ({ run }) => {
     }
   ];
 
+  // Elevation gain/loss if altitude present
+  if (run.route && run.route.length > 1 && run.route.some(p => typeof p.altitude === 'number')) {
+    let gain = 0;
+    let loss = 0;
+    for (let i = 1; i < run.route.length; i++) {
+      const prev = run.route[i - 1]?.altitude ?? 0;
+      const curr = run.route[i]?.altitude ?? 0;
+      const delta = curr - prev;
+      if (delta > 0) gain += delta; else loss += -delta;
+    }
+    metrics.push({
+      label: 'Elevation',
+      value: `${Math.round(gain)} m / ${Math.round(loss)} m`,
+      icon: 'trending-up-outline' as any
+    });
+  }
+
   return (
     <View style={styles.metricsContainer}>
       <Text style={styles.sectionTitle}>Run Summary</Text>
@@ -169,15 +187,32 @@ interface RouteMapProps {
 
 const RouteMap: React.FC<RouteMapProps> = ({ gpsPoints }) => {
   const [showLive, setShowLive] = React.useState(false);
+  const [mapType, setMapType] = React.useState<'standard' | 'satellite'>('standard');
+  const [routeColor, setRouteColor] = React.useState<string>('#FF6B35');
   return (
     <View style={styles.mapContainer}>
       <Text style={styles.sectionTitle}>Route Map</Text>
-      <CurrentRouteMap points={gpsPoints} enableAnimation={true} />
+      <CurrentRouteMap points={gpsPoints} enableAnimation={true} mapType={mapType} routeColor={routeColor} />
 
       <View style={styles.mapActions}>
         <TouchableOpacity style={styles.liveButton} onPress={() => setShowLive(true)}>
           <Ionicons name="play" size={16} color="#fff" />
           <Text style={styles.liveButtonText}>Ver recorrido en vivo</Text>
+        </TouchableOpacity>
+        <View style={{ flex: 1 }} />
+        <TouchableOpacity
+          style={[styles.liveButton, { backgroundColor: '#6c757d', marginLeft: 8 }]}
+          onPress={() => setMapType(t => (t === 'standard' ? 'satellite' : 'standard'))}
+        >
+          <Ionicons name="map-outline" size={16} color="#fff" />
+          <Text style={styles.liveButtonText}>{mapType === 'standard' ? 'Satellite' : 'Standard'}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.liveButton, { backgroundColor: '#6c757d', marginLeft: 8 }]}
+          onPress={() => setRouteColor(c => (c === '#FF6B35' ? '#2196F3' : c === '#2196F3' ? '#4CAF50' : '#FF6B35'))}
+        >
+          <Ionicons name="color-palette-outline" size={16} color="#fff" />
+          <Text style={styles.liveButtonText}>Color</Text>
         </TouchableOpacity>
       </View>
 
@@ -199,6 +234,23 @@ const RouteMap: React.FC<RouteMapProps> = ({ gpsPoints }) => {
               ? `${Math.round(gpsPoints.reduce((sum, p) => sum + (p.accuracy || 0), 0) / gpsPoints.length)}m`
               : 'N/A'
             }
+          </Text>
+        </View>
+        <View style={styles.mapStat}>
+          <Text style={styles.mapStatLabel}>Signal Gaps</Text>
+          <Text style={styles.mapStatValue}>
+            {(() => {
+              if (gpsPoints.length < 2) return 0;
+              let gaps = 0;
+              for (let i = 1; i < gpsPoints.length; i++) {
+                const curr = gpsPoints[i];
+                const prev = gpsPoints[i - 1];
+                if (!curr || !prev) continue;
+                const dt = curr.timestamp.getTime() - prev.timestamp.getTime();
+                if (dt > 15000) gaps++; // >15s gap
+              }
+              return gaps;
+            })()}
           </Text>
         </View>
       </View>
@@ -240,12 +292,16 @@ const PaceAnalysis: React.FC<PaceAnalysisProps> = ({ run }) => {
     let kmStartIndex = 0;
 
     for (let i = 1; i < points.length; i++) {
-      const distance = calculateDistance(points[i - 1], points[i]);
+      const prev = points[i - 1]!;
+      const curr = points[i]!;
+      const distance = calculateDistance(prev, curr);
       totalDistance += distance;
 
       if (totalDistance >= currentKm * 1000 || i === points.length - 1) {
-        const startTime = points[kmStartIndex].timestamp.getTime();
-        const endTime = points[i].timestamp.getTime();
+        const start = points[kmStartIndex]!;
+        const endp = points[i]!;
+        const startTime = start.timestamp.getTime();
+        const endTime = endp.timestamp.getTime();
         const splitTime = (endTime - startTime) / 1000;
         const splitDistance = Math.min(totalDistance - (currentKm - 1) * 1000, 1000);
         const pace = splitTime / (splitDistance / 1000);
@@ -294,6 +350,7 @@ const PaceAnalysis: React.FC<PaceAnalysisProps> = ({ run }) => {
   return (
     <View style={styles.paceContainer}>
       <Text style={styles.sectionTitle}>Pace Analysis</Text>
+      <PaceChartComponent gpsPoints={run.route || []} chartType="time" />
 
       {fastestSplit && slowestSplit && (
         <View style={styles.paceHighlights}>
@@ -389,10 +446,12 @@ export const RunDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Save',
-          onPress: async (newName) => {
-            if (newName && newName.trim()) {
+          onPress: (newName?: string) => {
+            const value = (newName ?? '').trim();
+            if (!value) return;
+            (async () => {
               try {
-                const result = await updateRunUseCase.execute(runId, { name: newName.trim() });
+                const result = await updateRunUseCase.execute(runId, { name: value });
                 if (result.success) {
                   setRun(result.data);
                   navigation.setOptions({ title: result.data.name });
@@ -403,7 +462,7 @@ export const RunDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
               } catch (error) {
                 Alert.alert('Error', 'Failed to update run name');
               }
-            }
+            })();
           }
         }
       ],
@@ -527,6 +586,36 @@ ${run.notes ? '📝 ' + run.notes : ''}
         <RouteMap gpsPoints={run.route || []} />
 
         <PaceAnalysis run={run} />
+
+        {/* Export & Share Section */}
+        <View style={{ padding: 20, paddingTop: 0 }}>
+          <TouchableOpacity
+            style={[styles.liveButton, { backgroundColor: '#28a745' }]}
+            onPress={() => {
+              const gpx = `<?xml version="1.0" encoding="UTF-8"?>\n` +
+                `<gpx version=\"1.1\" creator=\"PersonalRunningTracker\">\n` +
+                `  <trk>\n` +
+                `    <name>${run.name}</name>\n` +
+                `    <trkseg>\n` +
+                `${(run.route || [])
+                  .map(
+                    (p) =>
+                      `      <trkpt lat=\"${p.latitude}\" lon=\"${p.longitude}\">\n` +
+                      (p.altitude != null ? `        <ele>${p.altitude}</ele>\n` : '') +
+                      `        <time>${p.timestamp.toISOString()}</time>\n` +
+                      `      </trkpt>`
+                  )
+                  .join('\n')}\n` +
+                `    </trkseg>\n` +
+                `  </trk>\n` +
+                `</gpx>`;
+              Share.share({ title: `${run.name}.gpx`, message: gpx }).catch(() => {});
+            }}
+          >
+            <Ionicons name="download-outline" size={16} color="#fff" />
+            <Text style={styles.liveButtonText}>Export GPX</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -721,10 +810,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#333'
-  },
-  mapActions: {
-    marginTop: 4,
-    alignItems: 'flex-start'
   },
   animateButton: {
     flexDirection: 'row',

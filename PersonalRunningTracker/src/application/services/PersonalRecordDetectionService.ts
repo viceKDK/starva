@@ -11,6 +11,11 @@ export class PersonalRecordDetectionService {
   async detectNewRecords(run: Run): Promise<Result<PersonalRecord[], string>> {
     try {
       const newRecords: PersonalRecord[] = [];
+
+      // GPS accuracy validation: ensure reasonable accuracy across the route
+      if (!this.hasSufficientGPSAccuracy(run)) {
+        return { success: true, data: [] };
+      }
       const categories = this.getApplicableCategories(run);
 
       for (const category of categories) {
@@ -42,6 +47,18 @@ export class PersonalRecordDetectionService {
     }
   }
 
+  private hasSufficientGPSAccuracy(run: Run): boolean {
+    if (!run.route || run.route.length < 2) return false;
+    const accuracies = run.route
+      .map(p => (typeof p.accuracy === 'number' ? (p.accuracy as number) : 50)) // default 50m if missing
+      .filter(a => isFinite(a) && a > 0);
+    if (accuracies.length === 0) return true;
+    const avg = accuracies.reduce((s, a) => s + a, 0) / accuracies.length;
+    // Accept if average accuracy <= 50m and at least 70% of points are <= 50m
+    const goodCount = accuracies.filter(a => a <= 50).length;
+    return avg <= 50 && goodCount / accuracies.length >= 0.7;
+  }
+
   private getApplicableCategories(run: Run): RecordCategory[] {
     const categories: RecordCategory[] = ['LONGEST_DISTANCE', 'LONGEST_DURATION'];
     const distanceKm = run.distance / 1000;
@@ -56,11 +73,16 @@ export class PersonalRecordDetectionService {
     }
 
     if (distanceKm >= 10) {
-      categories.push('FASTEST_10K');
+      categories.push('FASTEST_10K', 'BEST_PACE_10K');
     }
 
     if (distanceKm >= 21.1) {
       categories.push('FASTEST_HALF_MARATHON');
+    }
+
+    // Elevation gain category if we have altitude data
+    if (run.route && run.route.length > 1 && run.route.some(p => typeof p.altitude === 'number')) {
+      categories.push('MOST_ELEVATION_GAIN');
     }
 
     return categories;
@@ -78,9 +100,11 @@ export class PersonalRecordDetectionService {
 
       case 'BEST_PACE_1K':
       case 'BEST_PACE_5K':
+      case 'BEST_PACE_10K':
         // Return average pace for the entire run if it meets minimum distance
         const minimumDistance = category === 'BEST_PACE_1K' ? 1 : 5;
-        if (distanceKm >= minimumDistance) {
+        const minimumDistanceForPace = category === 'BEST_PACE_10K' ? 10 : minimumDistance;
+        if (distanceKm >= minimumDistanceForPace) {
           return run.averagePace; // seconds per km
         }
         return null;
@@ -104,6 +128,20 @@ export class PersonalRecordDetectionService {
           return 21100 * (run.averagePace / 1000); // estimated half marathon time in seconds
         }
         return null;
+
+      case 'MOST_ELEVATION_GAIN':
+        // Sum positive elevation differences; requires altitude data
+        if (!run.route || run.route.length < 2) return null;
+        let gain = 0;
+        for (let i = 1; i < run.route.length; i++) {
+          const prev = run.route[i - 1]!;
+          const curr = run.route[i]!;
+          if (typeof prev.altitude === 'number' && typeof curr.altitude === 'number') {
+            const diff = (curr.altitude as number) - (prev.altitude as number);
+            if (diff > 0) gain += diff;
+          }
+        }
+        return gain > 0 ? gain : null;
 
       default:
         return null;
@@ -151,7 +189,11 @@ export class PersonalRecordDetectionService {
         return value >= 100; // minimum 100 meters
 
       case 'LONGEST_DURATION':
-        return value >= 60; // minimum 1 minute
+        return value >= 120; // minimum 2 minutes per acceptance criteria
+
+      case 'MOST_ELEVATION_GAIN':
+        // Require at least 10 meters of gain to be meaningful
+        return value >= 10;
 
       case 'BEST_PACE_1K':
       case 'BEST_PACE_5K':

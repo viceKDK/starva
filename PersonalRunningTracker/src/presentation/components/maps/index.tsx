@@ -7,12 +7,19 @@ import { StaticMapboxImage } from './StaticMapboxImage';
 import { ExpoAppleRouteMap } from './ExpoAppleRouteMap';
 import type { RouteMapProps } from './types';
 
-export const CurrentRouteMap: React.FC<RouteMapProps> = ({ points }) => {
+export const CurrentRouteMap: React.FC<RouteMapProps> = ({ points, mapType, routeColor }) => {
   // Try rendering expo-maps. If the module isn't present (Expo Go), fall back to static image.
   try {
     // Probe require; if it throws, we'll go to fallback
     require('expo-maps');
-    return <ExpoAppleRouteMap points={points} enableAnimation={false} />;
+    return (
+      <ExpoAppleRouteMap
+        points={points}
+        enableAnimation={false}
+        {...(mapType ? { mapType } : {})}
+        {...(routeColor ? { routeColor } : {})}
+      />
+    );
   } catch (e) {
     const width = Math.round(Dimensions.get('window').width - 32);
     const height = 200;

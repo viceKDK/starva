@@ -95,30 +95,27 @@ export const AppNavigator: React.FC = () => {
           component={TabNavigator}
           options={{ headerShown: false }}
         />
-        <Stack.Screen
-          name="RunCompletion"
-          component={RunCompletionScreen}
-          options={{
-            title: 'Run Summary',
-            headerBackTitleVisible: false
-          }}
-        />
-        <Stack.Screen
-          name="RunDetail"
-          component={RunDetailsScreen}
-          options={{
-            title: 'Run Details',
-            headerBackTitleVisible: false
-          }}
-        />
-        <Stack.Screen
-          name="Achievements"
-          component={AchievementsScreen}
-          options={{
-            title: 'Achievements',
-            headerBackTitleVisible: false
-          }}
-        />
+      <Stack.Screen
+        name="RunCompletion"
+        component={RunCompletionScreen}
+        options={{
+            title: 'Run Summary'
+        }}
+      />
+      <Stack.Screen
+        name="RunDetail"
+        component={RunDetailsScreen}
+        options={{
+            title: 'Run Details'
+        }}
+      />
+      <Stack.Screen
+        name="Achievements"
+        component={AchievementsScreen}
+        options={{
+            title: 'Achievements'
+        }}
+      />
       </Stack.Navigator>
 
       {/* Session Recovery Dialog */}

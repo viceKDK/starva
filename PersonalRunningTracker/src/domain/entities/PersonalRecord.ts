@@ -5,7 +5,9 @@ export type RecordCategory =
   | 'FASTEST_HALF_MARATHON'
   | 'BEST_PACE_1K'
   | 'BEST_PACE_5K'
-  | 'LONGEST_DURATION';
+  | 'BEST_PACE_10K'
+  | 'LONGEST_DURATION'
+  | 'MOST_ELEVATION_GAIN';
 
 export interface PersonalRecordId {
   value: string;
@@ -57,7 +59,10 @@ export class PersonalRecord {
         return this.formatDuration(this.value);
       case 'BEST_PACE_1K':
       case 'BEST_PACE_5K':
+      case 'BEST_PACE_10K':
         return this.formatPace(this.value);
+      case 'MOST_ELEVATION_GAIN':
+        return `${Math.round(this.value)} m`;
       default:
         return this.value.toString();
     }
@@ -79,6 +84,10 @@ export class PersonalRecord {
         return 'Best 1K Pace';
       case 'BEST_PACE_5K':
         return 'Best 5K Pace';
+      case 'BEST_PACE_10K':
+        return 'Best 10K Pace';
+      case 'MOST_ELEVATION_GAIN':
+        return 'Most Elevation Gain';
       default:
         return this.category;
     }
@@ -133,6 +142,10 @@ export class PersonalRecord {
 
     if (this.category === 'LONGEST_DURATION') {
       return `${this.formatDuration(diff)} longer`;
+    }
+
+    if (this.category === 'MOST_ELEVATION_GAIN') {
+      return `${Math.round(diff)} m more climb`;
     }
 
     return `Improved by ${diff}`;

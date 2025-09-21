@@ -60,8 +60,8 @@ export const RouteLivePreview: React.FC<Props> = ({ points, onClose, height = 28
     if (!animating || points.length < 2) return;
     if (idx >= points.length) return;
     const i = idx;
-    const t1 = points[i - 1].timestamp.getTime();
-    const t2 = points[i].timestamp.getTime();
+    const t1 = points[i - 1]!.timestamp.getTime();
+    const t2 = points[i]!.timestamp.getTime();
     const delta = Math.max(50, (t2 - t1) / 20); // 20x speed, min 50ms
     timerRef.current && clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => setIdx(i + 1), delta);
@@ -152,4 +152,3 @@ const styles = StyleSheet.create({
 });
 
 export default RouteLivePreview;
-

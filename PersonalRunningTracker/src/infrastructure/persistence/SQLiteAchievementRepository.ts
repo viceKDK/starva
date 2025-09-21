@@ -1,4 +1,3 @@
-import * as SQLite from 'expo-sqlite';
 import { Achievement, AchievementId, AchievementType, AchievementCriteria } from '@/domain/entities/Achievement';
 import { IAchievementRepository } from '@/domain/repositories/IAchievementRepository';
 import { Result } from '@/shared/types';

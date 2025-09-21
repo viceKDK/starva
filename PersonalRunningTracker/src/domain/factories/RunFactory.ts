@@ -1,4 +1,4 @@
-import { Run, RunId, GPSPoint } from '@/domain/entities';
+import { Run, GPSPoint } from '@/domain/entities';
 
 export interface CreateRunOptions {
   startTime: Date;
@@ -26,17 +26,20 @@ export class RunFactory {
     // Generate default name if not provided
     const runName = name || this.generateDefaultName(startTime);
 
-    return new Run(
-      RunId.generate(),
-      runName,
+    const id = `run_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const run: Run = {
+      id,
+      name: runName,
       startTime,
       endTime,
       distance,
       duration,
       averagePace,
       route,
-      notes
-    );
+      notes,
+      createdAt: new Date()
+    };
+    return run;
   }
 
   static createFromTracking(options: CreateRunFromTrackingOptions): Run {
@@ -48,8 +51,8 @@ export class RunFactory {
 
     // Extract start and end times from GPS points
     const sortedRoute = [...route].sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
-    const startTime = sortedRoute[0].timestamp;
-    const endTime = sortedRoute[sortedRoute.length - 1].timestamp;
+    const startTime = sortedRoute[0]!.timestamp;
+    const endTime = sortedRoute[sortedRoute.length - 1]!.timestamp;
 
     return this.create({
       startTime,
@@ -104,7 +107,7 @@ export class RunFactory {
 
     let totalDistance = 0;
     for (let i = 1; i < route.length; i++) {
-      totalDistance += this.calculateDistance(route[i - 1], route[i]);
+      totalDistance += this.calculateDistance(route[i - 1]!, route[i]!);
     }
     return totalDistance;
   }
