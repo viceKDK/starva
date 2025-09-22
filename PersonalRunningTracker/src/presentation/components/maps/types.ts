@@ -8,4 +8,12 @@ export type RouteMapProps = {
   mapType?: 'standard' | 'satellite';
   // Customize route color (hex or rgba). Default: orange.
   routeColor?: string;
+  // Show GPS quality indicator
+  showGPSQuality?: boolean;
+  // Enable pace-based color coding
+  showPaceColors?: boolean;
+  // Show elevation information
+  showElevation?: boolean;
+  // Show kilometer markers
+  showKilometerMarkers?: boolean;
 };

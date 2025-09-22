@@ -27,6 +27,7 @@ import {
   RunStatistics
 } from '@/application/usecases';
 import { SQLiteRunRepository } from '@/infrastructure/persistence';
+import { RunExportService } from '@/infrastructure/export/RunExportService';
 
 type Props = RootTabScreenProps<'History'>;
 
@@ -381,6 +382,57 @@ export const HistoryScreen: React.FC<Props> = ({ navigation }) => {
 
   const repository = useMemo(() => new SQLiteRunRepository(), []);
 
+  const exportSelectedRuns = useCallback(async () => {
+    const selectedRuns = runs.filter(r => selectedIds.has(r.id));
+    if (selectedRuns.length === 0) return;
+
+    if (Platform.OS === 'ios') {
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          options: ['Cancel', 'Export GPX', 'Export TCX', 'Export JSON'],
+          cancelButtonIndex: 0,
+          userInterfaceStyle: 'light',
+        },
+        async (index) => {
+          if (index === 0) return;
+
+          const format = index === 1 ? 'gpx' : index === 2 ? 'tcx' : 'json';
+
+          try {
+            const result = await RunExportService.exportMultipleRuns(selectedRuns, format);
+            if (result.success) {
+              Alert.alert('Export Success', `${selectedRuns.length} runs exported successfully!`);
+            } else {
+              Alert.alert('Export Failed', result.error || 'Unknown error occurred');
+            }
+          } catch (error) {
+            Alert.alert('Export Failed', 'Failed to export selected runs');
+          }
+        }
+      );
+    } else {
+      Alert.alert('Export Format', 'Choose export format:', [
+        { text: 'GPX', onPress: () => exportRuns(selectedRuns, 'gpx') },
+        { text: 'TCX', onPress: () => exportRuns(selectedRuns, 'tcx') },
+        { text: 'JSON', onPress: () => exportRuns(selectedRuns, 'json') },
+        { text: 'Cancel', style: 'cancel' },
+      ]);
+    }
+  }, [runs, selectedIds]);
+
+  const exportRuns = async (runsToExport: Run[], format: 'gpx' | 'tcx' | 'json') => {
+    try {
+      const result = await RunExportService.exportMultipleRuns(runsToExport, format);
+      if (result.success) {
+        Alert.alert('Export Success', `${runsToExport.length} runs exported successfully!`);
+      } else {
+        Alert.alert('Export Failed', result.error || 'Unknown error occurred');
+      }
+    } catch (error) {
+      Alert.alert('Export Failed', 'Failed to export runs');
+    }
+  };
+
   const duplicateRun = useCallback(async (run: Run) => {
     const newId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const copy: Run = {
@@ -539,7 +591,13 @@ export const HistoryScreen: React.FC<Props> = ({ navigation }) => {
           }}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Ionicons name="share-outline" size={18} color="#0d6efd" />
-              <Text style={{ color: '#0d6efd', marginLeft: 6, fontWeight: '600' }}>Share Summaries</Text>
+              <Text style={{ color: '#0d6efd', marginLeft: 6, fontWeight: '600' }}>Share</Text>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={exportSelectedRuns}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Ionicons name="download-outline" size={18} color="#28a745" />
+              <Text style={{ color: '#28a745', marginLeft: 6, fontWeight: '600' }}>Export</Text>
             </View>
           </TouchableOpacity>
         </View>

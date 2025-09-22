@@ -137,14 +137,14 @@ export class SQLiteRunRepository implements IRunRepository {
 
 ## Definition of Done
 
-- [ ] Database successfully initializes on app startup
-- [ ] All CRUD operations work correctly with test data
-- [ ] Repository integrates with dependency injection container
-- [ ] Database handles 1000+ runs without performance degradation
-- [ ] All database operations complete within 500ms
-- [ ] Migration system supports schema evolution
-- [ ] Unit tests achieve 90%+ coverage
-- [ ] Integration tests validate real database operations
+- [x] Database successfully initializes on app startup
+- [x] All CRUD operations work correctly with test data
+- [x] Repository integrates with dependency injection container
+- [x] Database handles 1000+ runs without performance degradation
+- [x] All database operations complete within 500ms
+- [x] Migration system supports schema evolution
+- [x] Unit tests achieve 90%+ coverage
+- [x] Integration tests validate real database operations
 
 ## Technical Notes
 

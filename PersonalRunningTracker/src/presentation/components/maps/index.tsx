@@ -27,6 +27,11 @@ export const CurrentRouteMap: React.FC<RouteMapProps> = ({ points, mapType, rout
   }
 };
 
+// Export additional map components
+export { EnhancedRouteMap } from './EnhancedRouteMap';
+export { GPSQualityIndicator } from './GPSQualityIndicator';
+export { StaticMapboxImage } from './StaticMapboxImage';
+
 // Alternative implementations (kept for future use):
 // export { AppleRouteMap as CurrentRouteMap } from './AppleRouteMap'; // uses react-native-maps
 // export { MapboxRouteMap as CurrentRouteMap } from './MapboxRouteMap'; // uses @rnmapbox/maps

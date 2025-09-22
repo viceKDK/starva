@@ -13,17 +13,33 @@ export interface AchievementProgressItem {
 }
 
 export class AchievementProgressService {
+  private progressCache: { data: AchievementProgressItem[]; timestamp: number } | null = null;
+  private readonly CACHE_DURATION = 30000; // 30 seconds
+
   constructor(
     private runRepository: IRunRepository,
     private achievementRepository: IAchievementRepository
   ) {}
 
-  async getProgress(): Promise<Result<AchievementProgressItem[], string>> {
-    try {
-      const runsRes = await this.runRepository.findAll();
-      if (!runsRes.success) return { success: false, error: 'Failed to load runs' };
+  async getProgress(forceRefresh: boolean = false): Promise<Result<AchievementProgressItem[], string>> {
+    // Check cache first unless force refresh is requested
+    if (!forceRefresh && this.progressCache) {
+      const cacheAge = Date.now() - this.progressCache.timestamp;
+      if (cacheAge < this.CACHE_DURATION) {
+        return { success: true, data: this.progressCache.data };
+      }
+    }
 
-      const earnedRes = await this.achievementRepository.findEarnedAchievements();
+    const startTime = Date.now();
+
+    try {
+      // Parallel data loading for better performance
+      const [runsRes, earnedRes] = await Promise.all([
+        this.runRepository.findAll(),
+        this.achievementRepository.findEarnedAchievements()
+      ]);
+
+      if (!runsRes.success) return { success: false, error: 'Failed to load runs' };
       if (!earnedRes.success) return { success: false, error: 'Failed to load achievements' };
 
       const runs = runsRes.data;
@@ -97,11 +113,45 @@ export class AchievementProgressService {
         });
       }
 
+      // Cache the results
+      this.progressCache = {
+        data: items,
+        timestamp: Date.now()
+      };
+
+      const endTime = Date.now();
+      const executionTime = endTime - startTime;
+
+      // Log performance for monitoring
+      if (executionTime > 500) {
+        console.warn(`Achievement progress calculation took ${executionTime}ms - consider optimization`);
+      }
+
       return { success: true, data: items };
     } catch (e) {
       console.error('AchievementProgressService error', e);
       return { success: false, error: 'Failed to compute progress' };
     }
+  }
+
+  /**
+   * Clear progress cache to force refresh on next call
+   */
+  clearCache(): void {
+    this.progressCache = null;
+  }
+
+  /**
+   * Get cached progress data without database query (if available)
+   */
+  getCachedProgress(): AchievementProgressItem[] | null {
+    if (this.progressCache) {
+      const cacheAge = Date.now() - this.progressCache.timestamp;
+      if (cacheAge < this.CACHE_DURATION) {
+        return this.progressCache.data;
+      }
+    }
+    return null;
   }
 
   private nextMilestone(milestones: number[], current: number): { target: number } | null {

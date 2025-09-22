@@ -7,16 +7,20 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
-  Share
+  Share,
+  Modal
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
+import * as Clipboard from 'expo-clipboard';
 // Centralized map implementation (Apple today; switch here via maps/index)
-import { CurrentRouteMap } from '@/presentation/components/maps';
+import { CurrentRouteMap, GPSQualityIndicator } from '@/presentation/components/maps';
 import RouteLivePreview from '@/presentation/components/maps/RouteLivePreview';
 import PaceChartComponent from '@/presentation/components/PaceChartComponent';
+import { GPSDataQualityCard } from '@/presentation/components/GPSDataQualityCard';
+import { RunExportService } from '@/infrastructure/export/RunExportService';
 
 import { RootStackParamList } from '@/shared/types';
 import { Run, GPSPoint } from '@/domain/entities';
@@ -48,7 +52,7 @@ interface RunDetailsHeaderProps {
   onDelete: () => void;
 }
 
-const RunDetailsHeader: React.FC<RunDetailsHeaderProps> = ({ run, onEdit, onShare, onDelete }) => {
+const RunDetailsHeader: React.FC<RunDetailsHeaderProps> = React.memo(({ run, onEdit, onShare, onDelete }) => {
   const formatDate = (date: Date): string => {
     return date.toLocaleDateString('en-US', {
       weekday: 'long',
@@ -65,13 +69,16 @@ const RunDetailsHeader: React.FC<RunDetailsHeaderProps> = ({ run, onEdit, onShar
     });
   };
 
+  const formattedDate = useMemo(() => formatDate(run.startTime), [run.startTime]);
+  const formattedTime = useMemo(() => formatTime(run.startTime), [run.startTime]);
+
   return (
     <View style={styles.header}>
       <View style={styles.headerTop}>
         <View style={styles.headerLeft}>
           <Text style={styles.runName}>{run.name}</Text>
           <Text style={styles.runDate}>
-            {formatDate(run.startTime)} at {formatTime(run.startTime)}
+            {formattedDate} at {formattedTime}
           </Text>
         </View>
         <View style={styles.headerActions}>
@@ -94,13 +101,13 @@ const RunDetailsHeader: React.FC<RunDetailsHeaderProps> = ({ run, onEdit, onShar
       )}
     </View>
   );
-};
+});
 
 interface MetricsGridProps {
   run: Run;
 }
 
-const MetricsGrid: React.FC<MetricsGridProps> = ({ run }) => {
+const MetricsGrid: React.FC<MetricsGridProps> = React.memo(({ run }) => {
   const formatDuration = (seconds: number): string => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
@@ -125,7 +132,7 @@ const MetricsGrid: React.FC<MetricsGridProps> = ({ run }) => {
     return Math.round(distanceKm * 60);
   };
 
-  const metrics = [
+  const metrics = useMemo(() => [
     {
       label: 'Distance',
       value: `${(run.distance / 1000).toFixed(2)} km`,
@@ -146,7 +153,7 @@ const MetricsGrid: React.FC<MetricsGridProps> = ({ run }) => {
       value: `${estimateCalories(run.distance / 1000, run.duration / 60)}`,
       icon: 'flame-outline'
     }
-  ];
+  ], [run.distance, run.duration, run.averagePace]);
 
   // Elevation gain/loss if altitude present
   if (run.route && run.route.length > 1 && run.route.some(p => typeof p.altitude === 'number')) {
@@ -179,13 +186,13 @@ const MetricsGrid: React.FC<MetricsGridProps> = ({ run }) => {
       </View>
     </View>
   );
-};
+});
 
 interface RouteMapProps {
   gpsPoints: GPSPoint[];
 }
 
-const RouteMap: React.FC<RouteMapProps> = ({ gpsPoints }) => {
+const RouteMap: React.FC<RouteMapProps> = React.memo(({ gpsPoints }) => {
   const [showLive, setShowLive] = React.useState(false);
   const [mapType, setMapType] = React.useState<'standard' | 'satellite'>('standard');
   const [routeColor, setRouteColor] = React.useState<string>('#FF6B35');
@@ -256,7 +263,7 @@ const RouteMap: React.FC<RouteMapProps> = ({ gpsPoints }) => {
       </View>
     </View>
   );
-};
+});
 
 interface PaceAnalysisProps {
   run: Run;
@@ -396,6 +403,9 @@ export const RunDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
   const [run, setRun] = useState<Run | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showQualityDetails, setShowQualityDetails] = useState(false);
+  const [showExportOptions, setShowExportOptions] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   // Initialize use cases
   const getRunByIdUseCase = useMemo(() => new GetRunByIdUseCase(new SQLiteRunRepository()), []);
@@ -474,43 +484,72 @@ export const RunDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
   const handleShare = async () => {
     if (!run) return;
 
-    const formatDuration = (seconds: number): string => {
-      const hours = Math.floor(seconds / 3600);
-      const minutes = Math.floor((seconds % 3600) / 60);
-      const secs = seconds % 60;
+    try {
+      await RunExportService.shareRunSummary(run);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to share run');
+    }
+  };
 
-      if (hours > 0) {
-        return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-      }
-      return `${minutes}:${secs.toString().padStart(2, '0')}`;
-    };
+  const handleExportGPX = async () => {
+    if (!run) return;
 
-    const formatPace = (secondsPerKm: number): string => {
-      if (secondsPerKm === 0 || !isFinite(secondsPerKm)) return '--:--';
+    setIsExporting(true);
+    try {
+      await RunExportService.saveAndShareFile(run, 'gpx', {
+        includeRoute: true,
+        includeNotes: true
+      });
+      setShowExportOptions(false);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to export GPX file');
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
-      const minutes = Math.floor(secondsPerKm / 60);
-      const seconds = Math.floor(secondsPerKm % 60);
-      return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-    };
+  const handleExportTCX = async () => {
+    if (!run) return;
 
-    const shareText = `🏃‍♂️ ${run.name}
+    setIsExporting(true);
+    try {
+      await RunExportService.saveAndShareFile(run, 'tcx', {
+        includeRoute: true
+      });
+      setShowExportOptions(false);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to export TCX file');
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
-📅 ${run.startTime.toLocaleDateString()}
-📏 Distance: ${(run.distance / 1000).toFixed(2)} km
-⏱️ Duration: ${formatDuration(run.duration)}
-⚡ Pace: ${formatPace(run.averagePace)}/km
+  const handleExportJSON = async () => {
+    if (!run) return;
 
-${run.notes ? '📝 ' + run.notes : ''}
+    setIsExporting(true);
+    try {
+      await RunExportService.saveAndShareFile(run, 'json', {
+        includeRoute: true,
+        includeNotes: true
+      });
+      setShowExportOptions(false);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to export JSON file');
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
-#running #fitness`;
+  const handleCopyToClipboard = async () => {
+    if (!run) return;
 
     try {
-      await Share.share({
-        message: shareText,
-        title: run.name
-      });
+      const summaryText = await RunExportService.copyRunSummary(run);
+      await Clipboard.setStringAsync(summaryText);
+      Alert.alert('Copied', 'Run summary copied to clipboard');
     } catch (error) {
-      console.error('Failed to share:', error);
+      Alert.alert('Error', 'Failed to copy to clipboard');
     }
   };
 
@@ -585,37 +624,117 @@ ${run.notes ? '📝 ' + run.notes : ''}
 
         <RouteMap gpsPoints={run.route || []} />
 
+        {/* GPS Data Quality Information */}
+        <GPSDataQualityCard
+          points={run.route || []}
+          onViewDetails={() => setShowQualityDetails(true)}
+        />
+
         <PaceAnalysis run={run} />
 
         {/* Export & Share Section */}
-        <View style={{ padding: 20, paddingTop: 0 }}>
-          <TouchableOpacity
-            style={[styles.liveButton, { backgroundColor: '#28a745' }]}
-            onPress={() => {
-              const gpx = `<?xml version="1.0" encoding="UTF-8"?>\n` +
-                `<gpx version=\"1.1\" creator=\"PersonalRunningTracker\">\n` +
-                `  <trk>\n` +
-                `    <name>${run.name}</name>\n` +
-                `    <trkseg>\n` +
-                `${(run.route || [])
-                  .map(
-                    (p) =>
-                      `      <trkpt lat=\"${p.latitude}\" lon=\"${p.longitude}\">\n` +
-                      (p.altitude != null ? `        <ele>${p.altitude}</ele>\n` : '') +
-                      `        <time>${p.timestamp.toISOString()}</time>\n` +
-                      `      </trkpt>`
-                  )
-                  .join('\n')}\n` +
-                `    </trkseg>\n` +
-                `  </trk>\n` +
-                `</gpx>`;
-              Share.share({ title: `${run.name}.gpx`, message: gpx }).catch(() => {});
-            }}
-          >
-            <Ionicons name="download-outline" size={16} color="#fff" />
-            <Text style={styles.liveButtonText}>Export GPX</Text>
-          </TouchableOpacity>
+        <View style={styles.exportSection}>
+          <Text style={styles.sectionTitle}>Export & Share</Text>
+
+          <View style={styles.exportActions}>
+            <TouchableOpacity style={styles.exportButton} onPress={() => setShowExportOptions(true)}>
+              <Ionicons name="download-outline" size={20} color="#007AFF" />
+              <Text style={styles.exportButtonText}>Export Data</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.exportButton} onPress={handleCopyToClipboard}>
+              <Ionicons name="copy-outline" size={20} color="#007AFF" />
+              <Text style={styles.exportButtonText}>Copy Summary</Text>
+            </TouchableOpacity>
+          </View>
         </View>
+
+        {/* Export Options Modal */}
+        <Modal
+          visible={showExportOptions}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setShowExportOptions(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.exportModal}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Export Run Data</Text>
+                <TouchableOpacity onPress={() => setShowExportOptions(false)}>
+                  <Ionicons name="close" size={24} color="#666" />
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.exportOptions}>
+                <TouchableOpacity
+                  style={styles.exportOption}
+                  onPress={handleExportGPX}
+                  disabled={isExporting}
+                >
+                  <Ionicons name="location-outline" size={24} color="#4CAF50" />
+                  <View style={styles.exportOptionText}>
+                    <Text style={styles.exportOptionTitle}>GPX File</Text>
+                    <Text style={styles.exportOptionDesc}>Standard GPS format for most apps</Text>
+                  </View>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.exportOption}
+                  onPress={handleExportTCX}
+                  disabled={isExporting}
+                >
+                  <Ionicons name="fitness-outline" size={24} color="#FF9800" />
+                  <View style={styles.exportOptionText}>
+                    <Text style={styles.exportOptionTitle}>TCX File</Text>
+                    <Text style={styles.exportOptionDesc}>Training Center XML format</Text>
+                  </View>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.exportOption}
+                  onPress={handleExportJSON}
+                  disabled={isExporting}
+                >
+                  <Ionicons name="code-outline" size={24} color="#2196F3" />
+                  <View style={styles.exportOptionText}>
+                    <Text style={styles.exportOptionTitle}>JSON File</Text>
+                    <Text style={styles.exportOptionDesc}>Raw data in JSON format</Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
+
+              {isExporting && (
+                <View style={styles.exportingIndicator}>
+                  <ActivityIndicator size="small" color="#007AFF" />
+                  <Text style={styles.exportingText}>Exporting...</Text>
+                </View>
+              )}
+            </View>
+          </View>
+        </Modal>
+
+        {/* GPS Quality Details Modal */}
+        <Modal
+          visible={showQualityDetails}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setShowQualityDetails(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.qualityModal}>
+              <GPSQualityIndicator
+                points={run.route || []}
+                showDetails={true}
+              />
+              <TouchableOpacity
+                style={styles.closeModalButton}
+                onPress={() => setShowQualityDetails(false)}
+              >
+                <Text style={styles.closeModalText}>Close</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
       </ScrollView>
     </SafeAreaView>
   );
@@ -907,5 +1026,116 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#333',
     textAlign: 'center'
+  },
+  // Export & Share Section Styles
+  exportSection: {
+    padding: 20,
+    paddingTop: 0
+  },
+  exportActions: {
+    flexDirection: 'row',
+    gap: 12
+  },
+  exportButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f8f9fa',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e9ecef'
+  },
+  exportButtonText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#007AFF',
+    marginLeft: 6
+  },
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  exportModal: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    margin: 20,
+    width: '90%',
+    maxWidth: 400
+  },
+  qualityModal: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    margin: 20,
+    width: '90%',
+    maxWidth: 500,
+    maxHeight: '80%'
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0'
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333'
+  },
+  exportOptions: {
+    padding: 20
+  },
+  exportOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 12,
+    backgroundColor: '#f8f9fa',
+    marginBottom: 12
+  },
+  exportOptionText: {
+    marginLeft: 12,
+    flex: 1
+  },
+  exportOptionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 2
+  },
+  exportOptionDesc: {
+    fontSize: 12,
+    color: '#666'
+  },
+  exportingIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0'
+  },
+  exportingText: {
+    fontSize: 14,
+    color: '#666',
+    marginLeft: 8
+  },
+  closeModalButton: {
+    padding: 20,
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0'
+  },
+  closeModalText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#007AFF'
   }
 });

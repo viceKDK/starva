@@ -2,6 +2,7 @@ import React, { useMemo, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import type { RouteMapProps } from './types';
 import { GeoUtils } from '@/shared/utils/GeoUtils';
+import { RouteSimplificationService } from '@/infrastructure/maps/RouteSimplificationService';
 
 // This component prefers expo-maps (Apple Maps on iOS) when available.
 // If expo-maps isn't installed (e.g., running in Expo Go without a dev build),
@@ -24,7 +25,7 @@ export const ExpoAppleRouteMap: React.FC<RouteMapProps> = ({ points, mapType, ro
   }
 
   const optimalRegion = useMemo(() => {
-    if (!points || points.length === 0) {
+    if (!simplifiedPoints || simplifiedPoints.length === 0) {
       return {
         latitude: 37.78825,
         longitude: -122.4324,
@@ -32,19 +33,30 @@ export const ExpoAppleRouteMap: React.FC<RouteMapProps> = ({ points, mapType, ro
         longitudeDelta: 0.0421,
       };
     }
-    const bb = GeoUtils.calculateBoundingBox(points, 0.2);
+    const bb = GeoUtils.calculateBoundingBox(simplifiedPoints, 0.2);
     return {
       latitude: bb.centerLatitude,
       longitude: bb.centerLongitude,
       latitudeDelta: bb.latitudeDelta,
       longitudeDelta: bb.longitudeDelta,
     };
-  }, [points]);
+  }, [simplifiedPoints]);
 
   const [mapKey, setMapKey] = useState(0);
   const resetView = useCallback(() => setMapKey(k => k + 1), []);
 
-  const coords = useMemo(() => points.map(p => ({ latitude: p.latitude, longitude: p.longitude })), [points]);
+  // Simplify route for better performance
+  const simplifiedPoints = useMemo(() => {
+    if (!points || points.length === 0) return [];
+
+    const config = RouteSimplificationService.getOptimalConfig(points);
+    return RouteSimplificationService.simplifyRoute(points, config);
+  }, [points]);
+
+  const coords = useMemo(() =>
+    simplifiedPoints.map(p => ({ latitude: p.latitude, longitude: p.longitude })),
+    [simplifiedPoints]
+  );
 
   // Tap-to-show pace marker
   const [pin, setPin] = useState<{ lat: number; lng: number; label: string } | null>(null);
