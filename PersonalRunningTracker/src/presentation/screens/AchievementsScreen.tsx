@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
+import ViewShot from 'react-native-view-shot';
 
 import { RootStackParamList } from '@/shared/types';
 import { Achievement } from '@/domain/entities/Achievement';
@@ -214,7 +215,7 @@ export const AchievementsScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  const handleCopy = async (achievement: Achievement) => {
+  const _handleCopy = async (achievement: Achievement) => {
     try {
       await Clipboard.setStringAsync(achievement.getShareText());
       Alert.alert('Copied', 'Achievement text copied to clipboard');
@@ -227,7 +228,7 @@ export const AchievementsScreen: React.FC<Props> = ({ navigation }) => {
     try {
       setShareCardAchievement(achievement);
       await new Promise(r => setTimeout(r, 50));
-      const uri = await viewShotRef.current?.capture?.({ format: 'png', quality: 1 });
+      const uri = await viewShotRef.current?.capture?.();
       if (uri) {
         await Share.share({ url: uri, title: achievement.title, message: achievement.title });
       }
@@ -651,7 +652,7 @@ const styles = StyleSheet.create({
   cardBrandingText: {
     fontSize: 12,
     color: '#aaa'
-  }
+  },
   emptyState: {
     flex: 1,
     justifyContent: 'center',
@@ -681,6 +682,36 @@ const styles = StyleSheet.create({
   startRunButtonText: {
     color: '#ffffff',
     fontSize: 16,
+    fontWeight: '600'
+  },
+  actionsRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 16
+  },
+  actionButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignItems: 'center'
+  },
+  actionPrimary: {
+    backgroundColor: '#FF6B35'
+  },
+  actionSecondary: {
+    backgroundColor: '#f0f0f0',
+    borderWidth: 1,
+    borderColor: '#ddd'
+  },
+  actionPrimaryText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600'
+  },
+  actionSecondaryText: {
+    color: '#333',
+    fontSize: 14,
     fontWeight: '600'
   }
 });

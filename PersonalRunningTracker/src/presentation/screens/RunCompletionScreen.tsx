@@ -526,7 +526,7 @@ export const RunCompletionScreen: React.FC<Props> = ({ route, navigation }) => {
             <View style={styles.modalActions}>
               <TouchableOpacity style={[styles.button, styles.secondaryButton]} onPress={() => {
                 setShowAchievementsModal(false);
-                navigation.navigate('MainTabs', { screen: 'Achievements' });
+                navigation.navigate('Achievements');
               }}>
                 <Ionicons name="list-outline" size={16} color="#FF6B35" />
                 <Text style={styles.secondaryButtonText}>View All</Text>

@@ -14,9 +14,9 @@ export class ExpoGPSService implements IGPSService {
 
   // Configuration constants
   private readonly GPS_TIMEOUT = 10000; // 10 seconds
-  private readonly MAX_ACCURACY_THRESHOLD = 100; // tolerate up to 100m to allow initial fix
-  private readonly MIN_TIME_INTERVAL = 1000; // 1 second
-  private readonly MIN_DISTANCE_INTERVAL = 5; // 5 meters
+  private readonly MAX_ACCURACY_THRESHOLD = 50; // 50m like iPhone Maps for better precision
+  private readonly MIN_TIME_INTERVAL = 500; // 0.5 seconds for smoother tracking
+  private readonly MIN_DISTANCE_INTERVAL = 2; // 2 meters for better route detail
   private readonly MAX_SPEED_THRESHOLD = 50; // 50 km/h
   private readonly MIN_TIME_BETWEEN_POINTS = 800; // 0.8 seconds
 
@@ -47,8 +47,8 @@ export class ExpoGPSService implements IGPSService {
       // Start location tracking
       this.subscription = await Location.watchPositionAsync(
         {
-          // Balanced improves time-to-first-fix in Expo Go; we can raise later
-          accuracy: Location.Accuracy.Balanced,
+          // High accuracy like iPhone Maps for better GPS precision
+          accuracy: Location.Accuracy.High,
           timeInterval: this.MIN_TIME_INTERVAL,
           distanceInterval: this.MIN_DISTANCE_INTERVAL,
         },
@@ -135,8 +135,8 @@ export class ExpoGPSService implements IGPSService {
 
       // Get current location with timeout
       const location = await Location.getCurrentPositionAsync({
-        // Balanced improves time-to-first-fix in Expo Go
-        accuracy: Location.Accuracy.Balanced,
+        // High accuracy like iPhone Maps for better GPS precision
+        accuracy: Location.Accuracy.High,
         timeInterval: this.GPS_TIMEOUT,
       });
 

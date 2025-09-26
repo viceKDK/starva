@@ -15,6 +15,7 @@ const Tab = createBottomTabNavigator<RootTabParamList>();
 const TabNavigator: React.FC = () => {
   return (
     <Tab.Navigator
+      id="TabNavigator"
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
           let iconName: keyof typeof Ionicons.glyphMap;
@@ -80,6 +81,7 @@ export const AppNavigator: React.FC = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
+        id="StackNavigator"
         screenOptions={{
           headerStyle: {
             backgroundColor: '#FF6B35',

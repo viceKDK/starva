@@ -105,7 +105,7 @@ export const GPSDataQualityCard: React.FC<GPSDataQualityCardProps> = ({
 
         {qualityMetrics.signalLossGaps.length > 0 && (
           <View style={styles.warningContainer}>
-            <Ionicons name="wifi-off-outline" size={16} color="#F44336" />
+            <Ionicons name="wifi-outline" size={16} color="#F44336" />
             <Text style={styles.warningText}>
               {qualityMetrics.signalLossGaps.length} signal loss period{qualityMetrics.signalLossGaps.length > 1 ? 's' : ''} detected
             </Text>

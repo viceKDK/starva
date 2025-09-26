@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
-import Svg, { Polyline, Rect } from 'react-native-svg';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Animated } from 'react-native';
+import Svg, { Polyline, Rect, Circle, Defs, LinearGradient, Stop, Path } from 'react-native-svg';
 import { GPSPoint } from '@/domain/entities';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -55,6 +55,23 @@ export const RouteLivePreview: React.FC<Props> = ({ points, onClose, height = 28
     }).join(' ');
   }, [points, idx, project]);
 
+  // Build completed route (gray background)
+  const completedCoords = useMemo(() => {
+    return points.map(p => {
+      const { x, y } = project(p);
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    }).join(' ');
+  }, [points, project]);
+
+  // Current position for animated marker
+  const currentPosition = useMemo(() => {
+    if (idx > 0 && idx <= points.length) {
+      const currentPoint = points[idx - 1];
+      return currentPoint ? project(currentPoint) : null;
+    }
+    return null;
+  }, [points, idx, project]);
+
   // Drive animation by timestamps (compressed)
   useEffect(() => {
     if (!animating || points.length < 2) return;
@@ -79,17 +96,126 @@ export const RouteLivePreview: React.FC<Props> = ({ points, onClose, height = 28
   }
 
   return (
-    <View style={[styles.wrapper, { height }]}> 
+    <View style={[styles.wrapper, { height }]}>
       <Svg width={width} height={height}>
+        <Defs>
+          {/* Gradient for the route line */}
+          <LinearGradient id="routeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <Stop offset="0%" stopColor="#FF8A50" stopOpacity="0.9" />
+            <Stop offset="100%" stopColor="#FF6B35" stopOpacity="1" />
+          </LinearGradient>
+
+          {/* Gradient for route shadow */}
+          <LinearGradient id="routeShadow" x1="0%" y1="0%" x2="0%" y2="100%">
+            <Stop offset="0%" stopColor="#FF6B35" stopOpacity="0.3" />
+            <Stop offset="100%" stopColor="#FF6B35" stopOpacity="0.1" />
+          </LinearGradient>
+        </Defs>
+
         <Rect x={0} y={0} width={width} height={height} fill="#f8f9fa" rx={12} />
-        <Polyline
-          points={coords}
-          fill="none"
-          stroke="#FF6B35"
-          strokeWidth={4}
-          strokeLinejoin="round"
-          strokeLinecap="round"
-        />
+
+        {/* Background route (completed path in light gray) */}
+        {completedCoords && (
+          <Polyline
+            points={completedCoords}
+            fill="none"
+            stroke="#E0E0E0"
+            strokeWidth={3}
+            strokeLinejoin="round"
+            strokeLinecap="round"
+            strokeOpacity="0.6"
+          />
+        )}
+
+        {/* Route shadow */}
+        {coords && (
+          <Polyline
+            points={coords}
+            fill="none"
+            stroke="url(#routeShadow)"
+            strokeWidth={8}
+            strokeLinejoin="round"
+            strokeLinecap="round"
+          />
+        )}
+
+        {/* Active route line (orange, like iPhone Maps) */}
+        {coords && (
+          <Polyline
+            points={coords}
+            fill="none"
+            stroke="url(#routeGradient)"
+            strokeWidth={4}
+            strokeLinejoin="round"
+            strokeLinecap="round"
+          />
+        )}
+
+        {/* Start point marker */}
+        {points.length > 0 && (() => {
+          const startPoint = project(points[0]);
+          return (
+            <>
+              <Circle
+                cx={startPoint.x}
+                cy={startPoint.y}
+                r="8"
+                fill="#4CAF50"
+                stroke="#fff"
+                strokeWidth="2"
+              />
+              <Circle
+                cx={startPoint.x}
+                cy={startPoint.y}
+                r="3"
+                fill="#fff"
+              />
+            </>
+          );
+        })()}
+
+        {/* Current position marker (animated) */}
+        {currentPosition && animating && (
+          <>
+            {/* Outer pulsing circle */}
+            <Circle
+              cx={currentPosition.x}
+              cy={currentPosition.y}
+              r="15"
+              fill="#FF6B35"
+              fillOpacity="0.3"
+            />
+
+            {/* Direction indicator */}
+            <Circle
+              cx={currentPosition.x}
+              cy={currentPosition.y}
+              r="10"
+              fill="none"
+              stroke="#FF6B35"
+              strokeWidth="2"
+              strokeOpacity="0.8"
+            />
+
+            {/* Main marker */}
+            <Circle
+              cx={currentPosition.x}
+              cy={currentPosition.y}
+              r="6"
+              fill="#FF6B35"
+              stroke="#fff"
+              strokeWidth="2"
+            />
+
+            {/* Center dot */}
+            <Circle
+              cx={currentPosition.x}
+              cy={currentPosition.y}
+              r="2"
+              fill="#fff"
+            />
+          </>
+        )}
       </Svg>
       <View style={styles.actions}>
         <TouchableOpacity style={[styles.btn, styles.primary]} onPress={() => setAnimating(!animating)}>

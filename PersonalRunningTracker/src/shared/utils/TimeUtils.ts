@@ -34,15 +34,16 @@ export class TimeUtils {
         if (minutes > 0) return `${minutes}m ${secs}s`;
         return `${secs}s`;
 
-      case 'long':
+      case 'long': {
         const parts: string[] = [];
         if (hours > 0) parts.push(`${hours} hour${hours !== 1 ? 's' : ''}`);
         if (minutes > 0) parts.push(`${minutes} minute${minutes !== 1 ? 's' : ''}`);
         if (secs > 0 || parts.length === 0) parts.push(`${secs} second${secs !== 1 ? 's' : ''}`);
         return parts.join(', ');
+      }
 
       case 'digital':
-      default:
+      default: {
         let result = '';
         if (showHours && hours > 0) {
           result = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
@@ -53,6 +54,7 @@ export class TimeUtils {
           result += `.${ms.toString().padStart(3, '0')}`;
         }
         return result;
+      }
     }
   }
 

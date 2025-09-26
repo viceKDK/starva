@@ -32,7 +32,6 @@ export const MapboxRouteMap: React.FC<Props> = ({ points, height = 220 }) => {
   let MapboxGL: any = null;
   try {
     // Dynamically require to avoid bundling errors if package not installed yet
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     MapboxGL = require('@rnmapbox/maps');
   } catch (e) {
     return <StaticMapboxImage points={points} width={width} height={height} />;

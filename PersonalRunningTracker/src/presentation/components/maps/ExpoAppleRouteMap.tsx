@@ -24,6 +24,14 @@ export const ExpoAppleRouteMap: React.FC<RouteMapProps> = ({ points, mapType, ro
     );
   }
 
+  // Simplify route for better performance
+  const simplifiedPoints = useMemo(() => {
+    if (!points || points.length === 0) return [];
+
+    const config = RouteSimplificationService.getOptimalConfig(points);
+    return RouteSimplificationService.simplifyRoute(points, config);
+  }, [points]);
+
   const optimalRegion = useMemo(() => {
     if (!simplifiedPoints || simplifiedPoints.length === 0) {
       return {
@@ -44,14 +52,6 @@ export const ExpoAppleRouteMap: React.FC<RouteMapProps> = ({ points, mapType, ro
 
   const [mapKey, setMapKey] = useState(0);
   const resetView = useCallback(() => setMapKey(k => k + 1), []);
-
-  // Simplify route for better performance
-  const simplifiedPoints = useMemo(() => {
-    if (!points || points.length === 0) return [];
-
-    const config = RouteSimplificationService.getOptimalConfig(points);
-    return RouteSimplificationService.simplifyRoute(points, config);
-  }, [points]);
 
   const coords = useMemo(() =>
     simplifiedPoints.map(p => ({ latitude: p.latitude, longitude: p.longitude })),

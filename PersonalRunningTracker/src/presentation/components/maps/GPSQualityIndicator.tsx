@@ -104,7 +104,7 @@ export const GPSQualityIndicator: React.FC<GPSQualityIndicatorProps> = ({
                       <Text style={styles.metricValue}>±{qualityMetrics.averageAccuracy}m</Text>
                     </View>
                     <View style={styles.metricRow}>
-                      <Text style={styles.metricLabel}>Poor Accuracy (>50m):</Text>
+                      <Text style={styles.metricLabel}>Poor Accuracy ({'>'}50m):</Text>
                       <Text style={styles.metricValue}>{qualityMetrics.poorAccuracyPercentage.toFixed(1)}%</Text>
                     </View>
                     <View style={styles.metricRow}>

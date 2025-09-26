@@ -18,6 +18,7 @@ import {
   MetricsDisplay,
   GPSStatusIndicator
 } from '../components/tracking';
+import { LiveTrackingMap } from '../components/maps/LiveTrackingMap';
 import {
   StartRunTrackingUseCase,
   PauseRunTrackingUseCase,
@@ -237,6 +238,17 @@ const TrackingContent: React.FC<{ navigation: Props['navigation']; deps: Deps }>
           metrics={controller.metrics}
           isTracking={controller.sessionState === RunSessionState.TRACKING}
         />
+
+        {/* Live Tracking Map */}
+        {controller.trackingPoints.length > 0 && (
+          <LiveTrackingMap
+            points={controller.trackingPoints}
+            currentLocation={controller.currentLocation}
+            height={200}
+            showCurrentLocation={true}
+            isTracking={controller.sessionState === RunSessionState.TRACKING}
+          />
+        )}
 
         {/* Error Display */}
         {controller.error && (

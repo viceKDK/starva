@@ -292,7 +292,7 @@ export const SplitAnalysisTable: React.FC<SplitAnalysisTableProps> = ({
             </Text>
 
             {showElevation && (
-              <View style={[styles.cell, styles.elevationColumn]}>
+              <View style={[styles.cell]}>
                 {split.elevationGain > 5 && (
                   <Text style={styles.elevationGain}>+{Math.round(split.elevationGain)}</Text>
                 )}

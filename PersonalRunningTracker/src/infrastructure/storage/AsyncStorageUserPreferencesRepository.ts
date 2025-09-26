@@ -63,7 +63,7 @@ export class AsyncStorageUserPreferencesRepository implements IUserPreferencesRe
       const currentPreferences = await this.get();
 
       if (!currentPreferences.success) {
-        return currentPreferences;
+        return { success: false, error: currentPreferences.error };
       }
 
       // Check if migration is needed (e.g., version mismatch)
