@@ -167,7 +167,7 @@ export class MapProviderFactory {
         staticMaps: true,
         geocoding: true,
         directions: true,
-        elevation: true,
+        elevation: false,
         realTimeTraffic: false,
         offline: false
       }
@@ -183,17 +183,12 @@ export class MapProviderFactory {
     serverSide?: boolean;
     freeTier?: boolean;
   }): 'google' | 'apple' | 'mapbox' | 'openroute' {
-    // If free tier with elevation is needed, OpenRouteService is best
-    if (requirements?.freeTier && requirements?.elevation) {
-      return 'openroute';
-    }
-
     // If free tier is needed, OpenRouteService is best option
     if (requirements?.freeTier) {
       return 'openroute';
     }
 
-    // If elevation is required, Google Maps or OpenRouteService
+    // If elevation is required, only Google Maps supports it
     if (requirements?.elevation) {
       return 'google';
     }

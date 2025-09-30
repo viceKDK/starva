@@ -32,7 +32,7 @@ export class OpenRouteProvider implements IMapProvider {
     supportsGeocoding: true,
     supportsReverseGeocoding: true,
     supportsDirections: true,
-    supportsElevation: true, // OpenRouteService supports elevation API
+    supportsElevation: false,
     maxMarkersPerRequest: 100,
     maxWaypointsPerRoute: 50
   };
@@ -196,41 +196,8 @@ export class OpenRouteProvider implements IMapProvider {
     };
   }
 
-  async getElevation(points: Array<{ latitude: number; longitude: number }>): Promise<ElevationResult[]> {
-    if (!this.config) throw new Error('OpenRouteService provider not initialized');
-
-    // OpenRouteService elevation API supports batch requests
-    const url = `${this.config.baseUrl}/elevation/point`;
-
-    const results: ElevationResult[] = [];
-
-    // Process in batches of 50
-    const batchSize = 50;
-    for (let i = 0; i < points.length; i += batchSize) {
-      const batch = points.slice(i, i + batchSize);
-
-      for (const point of batch) {
-        try {
-          const res = await fetch(`${url}?api_key=${this.config.apiKey}&geometry=${point.longitude},${point.latitude}`);
-          const data = await res.json();
-
-          results.push({
-            latitude: point.latitude,
-            longitude: point.longitude,
-            elevation: data.geometry?.coordinates?.[2] || 0
-          });
-        } catch (error) {
-          console.warn('Failed to get elevation for point:', point, error);
-          results.push({
-            latitude: point.latitude,
-            longitude: point.longitude,
-            elevation: 0
-          });
-        }
-      }
-    }
-
-    return results;
+  async getElevation(_points: Array<{ latitude: number; longitude: number }>): Promise<ElevationResult[]> {
+    throw new Error('Elevation data not supported by OpenRouteService provider');
   }
 
   calculateRouteRegion(route: GPSPoint[], padding: number = 0.1): MapRegion {
