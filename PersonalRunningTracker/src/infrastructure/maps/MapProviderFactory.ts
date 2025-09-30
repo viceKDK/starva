@@ -1,14 +1,18 @@
 import { IMapProvider } from '@/domain/services/IMapProvider';
 import { GoogleMapsProvider, GoogleMapsConfig } from './GoogleMapsProvider';
 import { AppleMapsProvider, AppleMapsConfig } from './AppleMapsProvider';
+import { MapboxProvider, MapboxConfig } from './MapboxProvider';
+import { OpenRouteProvider, OpenRouteConfig } from './OpenRouteProvider';
 
-export type MapProviderType = 'google' | 'apple' | 'auto';
+export type MapProviderType = 'google' | 'apple' | 'mapbox' | 'openroute' | 'auto';
 
 export interface MapProviderConfiguration {
   type: MapProviderType;
   google?: GoogleMapsConfig;
   apple?: AppleMapsConfig;
-  fallbackProvider?: 'google' | 'apple';
+  mapbox?: MapboxConfig;
+  openroute?: OpenRouteConfig;
+  fallbackProvider?: 'google' | 'apple' | 'mapbox' | 'openroute';
 }
 
 export interface MapProviderFeatures {
@@ -72,7 +76,7 @@ export class MapProviderFactory {
   /**
    * Get a specific provider by type
    */
-  static async getProviderByType(type: 'google' | 'apple'): Promise<IMapProvider> {
+  static async getProviderByType(type: 'google' | 'apple' | 'mapbox' | 'openroute'): Promise<IMapProvider> {
     let provider = this.providers.get(type);
 
     if (!provider) {
@@ -86,7 +90,7 @@ export class MapProviderFactory {
   /**
    * Switch to a different provider
    */
-  static async switchProvider(type: 'google' | 'apple'): Promise<void> {
+  static async switchProvider(type: 'google' | 'apple' | 'mapbox' | 'openroute'): Promise<void> {
     const provider = await this.getProviderByType(type);
     this.activeProvider = provider;
   }
@@ -150,6 +154,22 @@ export class MapProviderFactory {
         elevation: false,
         realTimeTraffic: true,
         offline: false
+      },
+      mapbox: {
+        staticMaps: true,
+        geocoding: true,
+        directions: true,
+        elevation: false,
+        realTimeTraffic: false,
+        offline: true
+      },
+      openroute: {
+        staticMaps: true,
+        geocoding: true,
+        directions: true,
+        elevation: true,
+        realTimeTraffic: false,
+        offline: false
       }
     };
   }
@@ -161,8 +181,19 @@ export class MapProviderFactory {
     elevation?: boolean;
     staticMaps?: boolean;
     serverSide?: boolean;
-  }): 'google' | 'apple' {
-    // If elevation is required, Google Maps is the only option
+    freeTier?: boolean;
+  }): 'google' | 'apple' | 'mapbox' | 'openroute' {
+    // If free tier with elevation is needed, OpenRouteService is best
+    if (requirements?.freeTier && requirements?.elevation) {
+      return 'openroute';
+    }
+
+    // If free tier is needed, OpenRouteService is best option
+    if (requirements?.freeTier) {
+      return 'openroute';
+    }
+
+    // If elevation is required, Google Maps or OpenRouteService
     if (requirements?.elevation) {
       return 'google';
     }
@@ -179,7 +210,7 @@ export class MapProviderFactory {
   /**
    * Create a map provider instance
    */
-  private static async createProvider(type: 'google' | 'apple'): Promise<IMapProvider> {
+  private static async createProvider(type: 'google' | 'apple' | 'mapbox' | 'openroute'): Promise<IMapProvider> {
     if (!this.configuration) {
       throw new Error('MapProviderFactory not configured');
     }
@@ -198,6 +229,22 @@ export class MapProviderFactory {
         await appleProvider.initialize(this.configuration.apple || {});
         return appleProvider;
 
+      case 'mapbox':
+        if (!this.configuration.mapbox?.accessToken) {
+          throw new Error('Mapbox access token not provided');
+        }
+        const mapboxProvider = new MapboxProvider();
+        await mapboxProvider.initialize(this.configuration.mapbox);
+        return mapboxProvider;
+
+      case 'openroute':
+        if (!this.configuration.openroute?.apiKey) {
+          throw new Error('OpenRouteService API key not provided');
+        }
+        const openrouteProvider = new OpenRouteProvider();
+        await openrouteProvider.initialize(this.configuration.openroute);
+        return openrouteProvider;
+
       default:
         throw new Error(`Unsupported provider type: ${type}`);
     }
@@ -206,12 +253,16 @@ export class MapProviderFactory {
   /**
    * Resolve the actual provider type from configuration
    */
-  private static resolveProviderType(type: MapProviderType): 'google' | 'apple' {
+  private static resolveProviderType(type: MapProviderType): 'google' | 'apple' | 'mapbox' | 'openroute' {
     switch (type) {
       case 'google':
         return 'google';
       case 'apple':
         return 'apple';
+      case 'mapbox':
+        return 'mapbox';
+      case 'openroute':
+        return 'openroute';
       case 'auto':
         return this.getRecommendedProvider();
       default:
@@ -232,7 +283,7 @@ export class MapProviderFactory {
   /**
    * Test provider connectivity and functionality
    */
-  static async testProvider(type: 'google' | 'apple'): Promise<{
+  static async testProvider(type: 'google' | 'apple' | 'mapbox' | 'openroute'): Promise<{
     isAvailable: boolean;
     features: string[];
     errors: string[];
