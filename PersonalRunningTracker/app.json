@@ -18,7 +18,12 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.personalrunningtracker.app"
+      "bundleIdentifier": "com.personalrunningtracker.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "This app needs your location to track your runs and show your route on the map.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs your location to track your runs even when the app is in the background.",
+        "UIBackgroundModes": ["location"]
+      }
     },
     "plugins": [
       [
