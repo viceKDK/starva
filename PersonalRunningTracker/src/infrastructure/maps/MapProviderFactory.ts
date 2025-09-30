@@ -143,7 +143,7 @@ export class MapProviderFactory {
         staticMaps: true,
         geocoding: true,
         directions: true,
-        elevation: true,
+        elevation: false,
         realTimeTraffic: true,
         offline: false
       },
@@ -183,23 +183,8 @@ export class MapProviderFactory {
     serverSide?: boolean;
     freeTier?: boolean;
   }): 'google' | 'apple' | 'mapbox' | 'openroute' {
-    // If free tier is needed, OpenRouteService is best option
-    if (requirements?.freeTier) {
-      return 'openroute';
-    }
-
-    // If elevation is required, only Google Maps supports it
-    if (requirements?.elevation) {
-      return 'google';
-    }
-
-    // If server-side generation is needed, Google Maps is better
-    if (requirements?.serverSide) {
-      return 'google';
-    }
-
-    // Default to platform preference
-    return AppleMapsProvider.getRecommendedProvider();
+    // Default to OpenRouteService as primary provider
+    return 'openroute';
   }
 
   /**

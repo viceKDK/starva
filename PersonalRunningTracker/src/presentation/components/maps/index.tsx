@@ -1,16 +1,27 @@
 ﻿// Central switch for map implementation used by the app.
-// Primary: expo-maps (Apple Maps on iOS) when available in a dev build.
-// Fallback for Expo Go: StaticMapboxImage (or OSM static image) without native modules.
+// Primary: OpenRouteService with OpenStreetMap (free tier, open source)
+// Fallback: expo-maps (Apple Maps) or StaticMapboxImage
 import React from 'react';
 import { Dimensions } from 'react-native';
+import { OpenRouteMap } from './OpenRouteMap';
 import { StaticMapboxImage } from './StaticMapboxImage';
 import { ExpoAppleRouteMap } from './ExpoAppleRouteMap';
 import type { RouteMapProps } from './types';
 
+// Default OpenRouteService API key (free tier: 2000 requests/day)
+const OPENROUTE_API_KEY = process.env.OPENROUTE_API_KEY || 'YOUR_OPENROUTE_API_KEY';
+
 export const CurrentRouteMap: React.FC<RouteMapProps> = ({ points, mapType, routeColor }) => {
-  // Try rendering expo-maps. If the module isn't present (Expo Go), fall back to static image.
+  const width = Math.round(Dimensions.get('window').width - 32);
+  const height = 200;
+
+  // Primary: OpenRouteService (free tier, open source)
+  if (OPENROUTE_API_KEY && OPENROUTE_API_KEY !== 'YOUR_OPENROUTE_API_KEY') {
+    return <OpenRouteMap route={points} width={width} height={height} apiKey={OPENROUTE_API_KEY} />;
+  }
+
+  // Fallback 1: Try expo-maps (Apple Maps)
   try {
-    // Probe require; if it throws, we'll go to fallback
     require('expo-maps');
     return (
       <ExpoAppleRouteMap
@@ -21,8 +32,7 @@ export const CurrentRouteMap: React.FC<RouteMapProps> = ({ points, mapType, rout
       />
     );
   } catch (e) {
-    const width = Math.round(Dimensions.get('window').width - 32);
-    const height = 200;
+    // Fallback 2: StaticMapboxImage
     return <StaticMapboxImage points={points} width={width} height={height} />;
   }
 };
@@ -31,6 +41,7 @@ export const CurrentRouteMap: React.FC<RouteMapProps> = ({ points, mapType, rout
 export { EnhancedRouteMap } from './EnhancedRouteMap';
 export { GPSQualityIndicator } from './GPSQualityIndicator';
 export { StaticMapboxImage } from './StaticMapboxImage';
+export { OpenRouteMap } from './OpenRouteMap';
 
 // Alternative implementations (kept for future use):
 // export { AppleRouteMap as CurrentRouteMap } from './AppleRouteMap'; // uses react-native-maps
