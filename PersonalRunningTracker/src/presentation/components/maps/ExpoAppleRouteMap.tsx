@@ -64,9 +64,9 @@ export const ExpoAppleRouteMap: React.FC<RouteMapProps> = ({ points }) => {
 };
 
 const styles = StyleSheet.create({
-  wrapper: { height: 200, borderRadius: 12, overflow: 'hidden' },
+  wrapper: { height: 300, borderRadius: 12, overflow: 'hidden' },
   map: { flex: 1 },
-  placeholder: { height: 200, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: '#f2f2f2' },
+  placeholder: { height: 300, borderRadius: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: '#f2f2f2' },
   placeholderText: { color: '#666' },
 });
 
