@@ -7,7 +7,6 @@ import { RouteMapProps } from './types';
 export const AppleRouteMap: React.FC<RouteMapProps> = ({ points, enableAnimation = true }) => {
   const [animating, setAnimating] = useState(false);
   const [animatedCoords, setAnimatedCoords] = useState<{ latitude: number; longitude: number }[]>([]);
-  const [progress, setProgress] = useState(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const indexRef = useRef(1);
   const mapRef = useRef<MapView>(null);
@@ -34,7 +33,6 @@ export const AppleRouteMap: React.FC<RouteMapProps> = ({ points, enableAnimation
   useEffect(() => {
     setAnimatedCoords(coords.length ? [coords[0]] : []);
     indexRef.current = 1;
-    setProgress(0);
     if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
     setAnimating(false);
   }, [coords]);
@@ -50,7 +48,6 @@ export const AppleRouteMap: React.FC<RouteMapProps> = ({ points, enableAnimation
     stopAnimation();
     setAnimatedCoords(coords.length ? [coords[0]] : []);
     indexRef.current = 1;
-    setProgress(0);
     // Reset camera to show full route
     if (mapRef.current && region) {
       mapRef.current.animateToRegion(region, 500);
@@ -65,7 +62,6 @@ export const AppleRouteMap: React.FC<RouteMapProps> = ({ points, enableAnimation
     if (indexRef.current >= coords.length || !animating) {
       setAnimatedCoords([coords[0]]);
       indexRef.current = 1;
-      setProgress(0);
     }
 
     setAnimating(true);
@@ -75,16 +71,11 @@ export const AppleRouteMap: React.FC<RouteMapProps> = ({ points, enableAnimation
       const i = indexRef.current;
       if (i >= coords.length) {
         stopAnimation();
-        setProgress(100);
         return;
       }
 
       const newCoords = [...animatedCoords, coords[i]];
       setAnimatedCoords(newCoords);
-
-      // Update progress
-      const currentProgress = Math.round((i / (coords.length - 1)) * 100);
-      setProgress(currentProgress);
 
       // Animate camera to follow the current position with a tighter zoom
       const currentPoint = coords[i];
@@ -120,8 +111,6 @@ export const AppleRouteMap: React.FC<RouteMapProps> = ({ points, enableAnimation
     );
   }
 
-  const currentPosition = animatedCoords.length > 0 ? animatedCoords[animatedCoords.length - 1] : null;
-
   return (
     <View>
       <View style={styles.mapWrapper}>
@@ -135,7 +124,7 @@ export const AppleRouteMap: React.FC<RouteMapProps> = ({ points, enableAnimation
           rotateEnabled={true}
           pitchEnabled={false}
         >
-          {/* Gray route showing full path (subtle) */}
+          {/* Full route - always visible */}
           {!animating && (
             <Polyline
               coordinates={coords}
@@ -182,29 +171,7 @@ export const AppleRouteMap: React.FC<RouteMapProps> = ({ points, enableAnimation
             title="Final"
             pinColor="#F44336"
           />
-
-          {/* Current position marker during animation */}
-          {animating && currentPosition && (
-            <Marker
-              coordinate={currentPosition}
-              anchor={{ x: 0.5, y: 0.5 }}
-            >
-              <View style={styles.currentPositionMarker}>
-                <View style={styles.currentPositionDot} />
-              </View>
-            </Marker>
-          )}
         </MapView>
-
-        {/* Progress indicator overlay */}
-        {animating && (
-          <View style={styles.progressOverlay}>
-            <View style={styles.progressContainer}>
-              <View style={[styles.progressBar, { width: `${progress}%` }]} />
-            </View>
-            <Text style={styles.progressText}>{progress}%</Text>
-          </View>
-        )}
       </View>
 
       {enableAnimation && (
@@ -219,7 +186,7 @@ export const AppleRouteMap: React.FC<RouteMapProps> = ({ points, enableAnimation
             </Text>
           </TouchableOpacity>
 
-          {(animating || progress > 0) && (
+          {animating && (
             <TouchableOpacity
               style={styles.resetButton}
               onPress={resetAnimation}
@@ -294,59 +261,6 @@ const styles = StyleSheet.create({
     marginLeft: 6,
     fontSize: 14,
     fontWeight: '500',
-  },
-  currentPositionMarker: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: 'rgba(33, 150, 243, 0.3)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  currentPositionDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#2196F3',
-    borderWidth: 2,
-    borderColor: '#fff',
-  },
-  progressOverlay: {
-    position: 'absolute',
-    top: 12,
-    left: 12,
-    right: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-  },
-  progressContainer: {
-    flex: 1,
-    height: 6,
-    backgroundColor: '#e0e0e0',
-    borderRadius: 3,
-    overflow: 'hidden',
-    marginRight: 8,
-  },
-  progressBar: {
-    height: '100%',
-    backgroundColor: '#FF6B35',
-    borderRadius: 3,
-  },
-  progressText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#333',
-    minWidth: 36,
-    textAlign: 'right',
   },
 });
 
