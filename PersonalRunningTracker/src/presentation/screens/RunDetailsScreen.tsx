@@ -15,7 +15,6 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
 // Centralized map implementation (Apple today; switch here via maps/index)
 import { CurrentRouteMap } from '@/presentation/components/maps';
-import RouteLivePreview from '@/presentation/components/maps/RouteLivePreview';
 
 import { RootStackParamList } from '@/shared/types';
 import { Run, GPSPoint } from '@/domain/entities';
@@ -168,38 +167,30 @@ interface RouteMapProps {
 }
 
 const RouteMap: React.FC<RouteMapProps> = ({ gpsPoints }) => {
-  const [showLive, setShowLive] = React.useState(false);
   return (
     <View style={styles.mapContainer}>
-      <Text style={styles.sectionTitle}>Route Map</Text>
+      <Text style={styles.sectionTitle}>Mapa del Recorrido</Text>
       <CurrentRouteMap points={gpsPoints} enableAnimation={true} />
-
-      <View style={styles.mapActions}>
-        <TouchableOpacity style={styles.liveButton} onPress={() => setShowLive(true)}>
-          <Ionicons name="play" size={16} color="#fff" />
-          <Text style={styles.liveButtonText}>Ver recorrido en vivo</Text>
-        </TouchableOpacity>
-      </View>
-
-      {showLive && (
-        <View style={styles.livePreviewWrapper}>
-          <RouteLivePreview points={gpsPoints} onClose={() => setShowLive(false)} />
-        </View>
-      )}
 
       <View style={styles.mapStats}>
         <View style={styles.mapStat}>
-          <Text style={styles.mapStatLabel}>GPS Points</Text>
-          <Text style={styles.mapStatValue}>{gpsPoints.length}</Text>
+          <Ionicons name="location" size={16} color="#FF6B35" style={styles.mapStatIcon} />
+          <View>
+            <Text style={styles.mapStatLabel}>Puntos GPS</Text>
+            <Text style={styles.mapStatValue}>{gpsPoints.length}</Text>
+          </View>
         </View>
         <View style={styles.mapStat}>
-          <Text style={styles.mapStatLabel}>Avg Accuracy</Text>
-          <Text style={styles.mapStatValue}>
-            {gpsPoints.length > 0
-              ? `${Math.round(gpsPoints.reduce((sum, p) => sum + (p.accuracy || 0), 0) / gpsPoints.length)}m`
-              : 'N/A'
-            }
-          </Text>
+          <Ionicons name="navigate" size={16} color="#FF6B35" style={styles.mapStatIcon} />
+          <View>
+            <Text style={styles.mapStatLabel}>Precisión Promedio</Text>
+            <Text style={styles.mapStatValue}>
+              {gpsPoints.length > 0
+                ? `${Math.round(gpsPoints.reduce((sum, p) => sum + (p.accuracy || 0), 0) / gpsPoints.length)}m`
+                : 'N/A'
+              }
+            </Text>
+          </View>
         </View>
       </View>
     </View>
@@ -684,61 +675,28 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     backgroundColor: '#f8f9fa',
     padding: 16,
-    borderRadius: 8
-  },
-  mapActions: {
-    marginTop: 8,
-    marginBottom: 8,
-    alignItems: 'flex-start'
-  },
-  liveButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#2196F3',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 6
-  },
-  liveButtonText: {
-    color: '#fff',
-    marginLeft: 6,
-    fontSize: 14,
-    fontWeight: '600'
-  },
-  livePreviewWrapper: {
-    marginTop: 8,
-    marginBottom: 8
+    borderRadius: 12,
+    marginTop: 8
   },
   mapStat: {
-    alignItems: 'center'
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8
+  },
+  mapStatIcon: {
+    marginRight: 4
   },
   mapStatLabel: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 4
+    fontSize: 11,
+    color: '#999',
+    marginBottom: 2,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5
   },
   mapStatValue: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
     color: '#333'
-  },
-  mapActions: {
-    marginTop: 4,
-    alignItems: 'flex-start'
-  },
-  animateButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#2196F3',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 6
-  },
-  animateButtonText: {
-    color: '#fff',
-    marginLeft: 6,
-    fontSize: 14,
-    fontWeight: '600'
   },
   paceContainer: {
     padding: 20,
