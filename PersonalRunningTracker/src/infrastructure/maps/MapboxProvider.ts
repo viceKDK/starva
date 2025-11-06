@@ -188,12 +188,12 @@ export class MapboxProvider implements IMapProvider {
     const markers: MapMarker[] = [];
     markers.push({
       id: 'start',
-      coordinate: { latitude: route[0].latitude, longitude: route[0].longitude },
+      coordinate: { latitude: route[0]!.latitude, longitude: route[0]!.longitude },
       title: 'Start',
       color: '#4CAF50'
     });
     if (route.length > 1) {
-      const end = route[route.length - 1];
+      const end = route[route.length - 1]!;
       markers.push({ id: 'end', coordinate: { latitude: end.latitude, longitude: end.longitude }, title: 'Finish', color: '#F44336' });
     }
     return markers;
@@ -244,4 +244,3 @@ export class MapboxProvider implements IMapProvider {
     return 18;
   }
 }
-

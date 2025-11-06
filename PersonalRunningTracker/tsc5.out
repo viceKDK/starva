@@ -1,0 +1,5 @@
+src/presentation/screens/AchievementsScreen.tsx(171,9): error TS6133: 'handleStartRun' is declared but its value is never read.
+src/presentation/screens/HistoryScreen.tsx(509,25): error TS6133: 'data' is declared but its value is never read.
+src/presentation/screens/RunCompletionScreen.tsx(20,1): error TS6133: 'PersonalRecord' is declared but its value is never read.
+src/presentation/screens/RunCompletionScreen.tsx(21,1): error TS6133: 'Achievement' is declared but its value is never read.
+src/presentation/screens/SettingsScreen.tsx(81,49): error TS6133: 'navigation' is declared but its value is never read.

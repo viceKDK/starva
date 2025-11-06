@@ -1,0 +1,112 @@
+src/application/services/DataIntegrityService.ts(71,28): error TS2551: Property 'value' does not exist on type 'string'. Did you mean 'valueOf'?
+src/application/services/DataIntegrityService.ts(86,26): error TS2551: Property 'value' does not exist on type 'string'. Did you mean 'valueOf'?
+src/application/services/DataIntegrityService.ts(122,23): error TS18048: 'runs' is possibly 'undefined'.
+src/application/services/DataIntegrityService.ts(193,21): error TS18048: 'runs' is possibly 'undefined'.
+src/application/services/DataIntegrityService.ts(193,40): error TS2551: Property 'value' does not exist on type 'string'. Did you mean 'valueOf'?
+src/application/services/DataIntegrityService.ts(200,27): error TS18048: 'runs' is possibly 'undefined'.
+src/application/services/GPSDataValidationService.ts(84,33): error TS2322: Type 'GPSPoint | undefined' is not assignable to type 'GPSPoint'.
+  Type 'undefined' is not assignable to type 'GPSPoint'.
+src/application/services/GPSDataValidationService.ts(90,47): error TS2345: Argument of type 'GPSPoint | undefined' is not assignable to parameter of type 'GPSPoint'.
+  Type 'undefined' is not assignable to type 'GPSPoint'.
+src/application/services/GPSDataValidationService.ts(91,25): error TS18048: 'currentPoint' is possibly 'undefined'.
+src/application/services/GPSDataValidationService.ts(91,60): error TS18048: 'previousPoint' is possibly 'undefined'.
+src/application/services/GPSDataValidationService.ts(98,23): error TS2345: Argument of type 'GPSPoint | undefined' is not assignable to parameter of type 'GPSPoint'.
+  Type 'undefined' is not assignable to type 'GPSPoint'.
+src/application/services/GPSDataValidationService.ts(102,13): error TS18048: 'currentPoint' is possibly 'undefined'.
+src/application/services/GPSDataValidationService.ts(102,46): error TS18048: 'previousPoint' is possibly 'undefined'.
+src/application/services/GPSDataValidationService.ts(103,15): error TS18048: 'currentPoint' is possibly 'undefined'.
+src/application/services/GPSDataValidationService.ts(103,40): error TS18048: 'previousPoint' is possibly 'undefined'.
+src/application/services/GPSDataValidationService.ts(104,13): error TS2322: Type 'GPSPoint | undefined' is not assignable to type 'GPSPoint'.
+  Type 'undefined' is not assignable to type 'GPSPoint'.
+src/application/services/GPSDataValidationService.ts(107,23): error TS2345: Argument of type 'GPSPoint | undefined' is not assignable to parameter of type 'GPSPoint'.
+  Type 'undefined' is not assignable to type 'GPSPoint'.
+src/application/services/GPSDataValidationService.ts(118,33): error TS2322: Type 'GPSPoint | undefined' is not assignable to type 'GPSPoint'.
+  Type 'undefined' is not assignable to type 'GPSPoint'.
+src/application/services/GPSDataValidationService.ts(126,28): error TS18048: 'previousPoint' is possibly 'undefined'.
+src/application/services/GPSDataValidationService.ts(126,53): error TS18048: 'nextPoint' is possibly 'undefined'.
+src/application/services/GPSDataValidationService.ts(127,28): error TS18048: 'previousPoint' is possibly 'undefined'.
+src/application/services/GPSDataValidationService.ts(127,54): error TS18048: 'nextPoint' is possibly 'undefined'.
+src/application/services/GPSDataValidationService.ts(132,20): error TS18048: 'currentPoint' is possibly 'undefined'.
+src/application/services/GPSDataValidationService.ts(133,19): error TS18048: 'currentPoint' is possibly 'undefined'.
+src/application/services/GPSDataValidationService.ts(134,19): error TS18048: 'currentPoint' is possibly 'undefined'.
+src/application/services/GPSDataValidationService.ts(137,59): error TS2345: Argument of type 'GPSPoint | undefined' is not assignable to parameter of type 'GPSPoint'.
+  Type 'undefined' is not assignable to type 'GPSPoint'.
+src/application/services/GPSDataValidationService.ts(141,21): error TS2345: Argument of type 'GPSPoint | undefined' is not assignable to parameter of type 'GPSPoint'.
+  Type 'undefined' is not assignable to type 'GPSPoint'.
+src/application/services/GPSDataValidationService.ts(147,19): error TS2345: Argument of type 'GPSPoint | undefined' is not assignable to parameter of type 'GPSPoint'.
+  Type 'undefined' is not assignable to type 'GPSPoint'.
+src/application/services/RunDataValidationService.ts(174,71): error TS6133: 'errors' is declared but its value is never read.
+src/application/services/RunDataValidationService.ts(177,24): error TS2532: Object is possibly 'undefined'.
+src/application/services/RunDataValidationService.ts(178,23): error TS2532: Object is possibly 'undefined'.
+src/application/services/RunDataValidationService.ts(191,11): error TS2532: Object is possibly 'undefined'.
+src/application/services/RunDataValidationService.ts(191,33): error TS2532: Object is possibly 'undefined'.
+src/application/services/RunDataValidationService.ts(228,25): error TS2532: Object is possibly 'undefined'.
+src/application/services/RunDataValidationService.ts(228,56): error TS2532: Object is possibly 'undefined'.
+src/application/services/RunDataValidationService.ts(235,56): error TS6133: 'errors' is declared but its value is never read.
+src/application/services/RunDataValidationService.ts(260,47): error TS2345: Argument of type 'GPSPoint | undefined' is not assignable to parameter of type 'GPSPoint'.
+  Type 'undefined' is not assignable to type 'GPSPoint'.
+src/application/usecases/DataIntegrityCheckUseCase.ts(10,23): error TS6138: Property 'runRepository' is declared but its value is never read.
+src/application/usecases/SaveRunUseCase.ts(24,13): error TS2375: Type '{ name: string; notes: string | undefined; id: string; startTime: Date; endTime: Date; duration: number; distance: number; averagePace: number; route: GPSPoint[]; createdAt: Date; }' is not assignable to type 'Run' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'notes' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/application/usecases/SaveRunUseCase.ts(42,9): error TS2375: Type 'Result<void, DatabaseError>' is not assignable to type 'Result<SaveRunResult, DatabaseError>' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Type 'Result<void, DatabaseError>' is not assignable to type '{ success: false; data?: never; error: DatabaseError; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+    Types of property 'success' are incompatible.
+      Type 'boolean' is not assignable to type 'false'.
+src/domain/repositories/IUserPreferencesRepository.ts(1,10): error TS6133: 'UserPreferences' is declared but its value is never read.
+src/infrastructure/maps/MapboxProvider.ts(191,31): error TS2532: Object is possibly 'undefined'.
+src/infrastructure/maps/MapboxProvider.ts(191,61): error TS2532: Object is possibly 'undefined'.
+src/infrastructure/maps/MapboxProvider.ts(197,57): error TS18048: 'end' is possibly 'undefined'.
+src/infrastructure/maps/MapboxProvider.ts(197,82): error TS18048: 'end' is possibly 'undefined'.
+src/infrastructure/persistence/SQLiteAchievementRepository.ts(1,1): error TS6133: 'SQLite' is declared but its value is never read.
+src/infrastructure/persistence/SQLitePersonalRecordRepository.ts(1,1): error TS6133: 'SQLite' is declared but its value is never read.
+src/presentation/components/maps/index.tsx(15,13): error TS2375: Type '{ points: GPSPoint[]; enableAnimation: false; mapType: "standard" | "satellite" | undefined; }' is not assignable to type 'RouteMapProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'mapType' are incompatible.
+    Type '"standard" | "satellite" | undefined' is not assignable to type '"standard" | "satellite"'.
+      Type 'undefined' is not assignable to type '"standard" | "satellite"'.
+src/presentation/components/maps/RouteLivePreview.tsx(63,16): error TS2532: Object is possibly 'undefined'.
+src/presentation/components/maps/RouteLivePreview.tsx(64,16): error TS2532: Object is possibly 'undefined'.
+src/presentation/components/maps/StaticMapboxImage.tsx(5,1): error TS6133: 'MapboxProvider' is declared but its value is never read.
+src/presentation/components/tracking/MetricsDisplay.tsx(29,5): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/presentation/components/tracking/MetricsDisplay.tsx(33,17): error TS2339: Property 'averagePace' does not exist on type 'RunMetrics'.
+src/presentation/components/tracking/MetricsDisplay.tsx(33,56): error TS2339: Property 'averagePace' does not exist on type 'RunMetrics'.
+src/presentation/components/tracking/MetricsDisplay.tsx(36,5): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/presentation/components/tracking/MetricsDisplay.tsx(36,31): error TS2339: Property 'averagePace' does not exist on type 'RunMetrics'.
+src/presentation/navigation/AppNavigator.tsx(103,13): error TS2353: Object literal may only specify known properties, and 'headerBackTitleVisible' does not exist in type 'StackNavigationOptions | ((props: { route: RouteProp<RootStackParamList, "RunCompletion">; navigation: StackNavigationProp<RootStackParamList, "RunCompletion", undefined>; theme: Theme; }) => StackNavigationOptions)'.
+src/presentation/navigation/AppNavigator.tsx(111,13): error TS2353: Object literal may only specify known properties, and 'headerBackTitleVisible' does not exist in type 'StackNavigationOptions | ((props: { route: RouteProp<RootStackParamList, "RunDetail">; navigation: StackNavigationProp<RootStackParamList, "RunDetail", undefined>; theme: Theme; }) => StackNavigationOptions)'.
+src/presentation/navigation/AppNavigator.tsx(119,13): error TS2353: Object literal may only specify known properties, and 'headerBackTitleVisible' does not exist in type 'StackNavigationOptions | ((props: { route: RouteProp<RootStackParamList, "Achievements">; navigation: StackNavigationProp<RootStackParamList, "Achievements", undefined>; theme: Theme; }) => StackNavigationOptions)'.
+src/presentation/screens/AchievementsScreen.tsx(93,9): error TS6133: 'achievementsByDifficulty' is declared but its value is never read.
+src/presentation/screens/AchievementsScreen.tsx(183,25): error TS2769: No overload matches this call.
+  Argument of type '["Tracking"]' is not assignable to parameter of type '[screen: "Settings", params?: undefined, options?: { merge?: boolean; pop?: boolean; }] | [screen: "MainTabs", params: { screen?: keyof RootTabParamList; }, options?: { merge?: boolean; pop?: boolean; }] | [screen: "RunDetail", params: { ...; }, options?: { ...; }] | [screen: ...] | [screen: ...]'.
+    Type '["Tracking"]' is not assignable to type '[screen: "Settings", params?: undefined, options?: { merge?: boolean; pop?: boolean; }] | [screen: "Achievements", params?: undefined, options?: { merge?: boolean; pop?: boolean; }]'.
+      Type '["Tracking"]' is not assignable to type '[screen: "Achievements", params?: undefined, options?: { merge?: boolean; pop?: boolean; }]'.
+        Type at position 0 in source is not compatible with type at position 0 in target.
+          Type '"Tracking"' is not assignable to type '"Achievements"'.
+  Overload 2 of 2, '(options: { name: "Settings"; params: undefined; path?: string; merge?: boolean; pop?: boolean; } | { name: "MainTabs"; params: { screen?: keyof RootTabParamList; }; path?: string; merge?: boolean; pop?: boolean; } | { ...; } | { ...; } | { ...; }): void', gave the following error.
+    Argument of type 'string' is not assignable to parameter of type '{ name: "Settings"; params: undefined; path?: string; merge?: boolean; pop?: boolean; } | { name: "MainTabs"; params: { screen?: keyof RootTabParamList; }; path?: string; merge?: boolean; pop?: boolean; } | { ...; } | { ...; } | { ...; }'.
+src/presentation/screens/AchievementsScreen.tsx(237,14): error TS2375: Type '{ totalAchievements: number; latestAchievement: Achievement | undefined; }' is not assignable to type 'StatsHeaderProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'latestAchievement' are incompatible.
+    Type 'Achievement | undefined' is not assignable to type 'Achievement'.
+      Type 'undefined' is not assignable to type 'Achievement'.
+src/presentation/screens/HistoryScreen.tsx(509,25): error TS6133: 'data' is declared but its value is never read.
+src/presentation/screens/PersonalRecordsScreen.tsx(21,84): error TS2344: Type '"PersonalRecords"' does not satisfy the constraint 'keyof RootStackParamList'.
+src/presentation/screens/PersonalRecordsScreen.tsx(181,25): error TS2769: No overload matches this call.
+  Argument of type '["Tracking"]' is not assignable to parameter of type '[screen: "Settings", params?: undefined, options?: { merge?: boolean; pop?: boolean; }] | [screen: "MainTabs", params: { screen?: keyof RootTabParamList; }, options?: { merge?: boolean; pop?: boolean; }] | [screen: "RunDetail", params: { ...; }, options?: { ...; }] | [screen: ...] | [screen: ...]'.
+    Type '["Tracking"]' is not assignable to type '[screen: "Settings", params?: undefined, options?: { merge?: boolean; pop?: boolean; }] | [screen: "Achievements", params?: undefined, options?: { merge?: boolean; pop?: boolean; }]'.
+      Type '["Tracking"]' is not assignable to type '[screen: "Achievements", params?: undefined, options?: { merge?: boolean; pop?: boolean; }]'.
+        Type at position 0 in source is not compatible with type at position 0 in target.
+          Type '"Tracking"' is not assignable to type '"Achievements"'.
+  Overload 2 of 2, '(options: { name: "Settings"; params: undefined; path?: string; merge?: boolean; pop?: boolean; } | { name: "MainTabs"; params: { screen?: keyof RootTabParamList; }; path?: string; merge?: boolean; pop?: boolean; } | { ...; } | { ...; } | { ...; }): void', gave the following error.
+    Argument of type 'string' is not assignable to parameter of type '{ name: "Settings"; params: undefined; path?: string; merge?: boolean; pop?: boolean; } | { name: "MainTabs"; params: { screen?: keyof RootTabParamList; }; path?: string; merge?: boolean; pop?: boolean; } | { ...; } | { ...; } | { ...; }'.
+src/presentation/screens/PersonalRecordsScreen.tsx(238,14): error TS2375: Type '{ totalRecords: number; latestRecord: PersonalRecord | undefined; onViewAchievements: () => void; }' is not assignable to type 'StatsHeaderProps' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'latestRecord' are incompatible.
+    Type 'PersonalRecord | undefined' is not assignable to type 'PersonalRecord'.
+      Type 'undefined' is not assignable to type 'PersonalRecord'.
+src/presentation/screens/RunCompletionScreen.tsx(75,10): error TS6133: 'personalRecords' is declared but its value is never read.
+src/presentation/screens/RunCompletionScreen.tsx(76,10): error TS6133: 'achievements' is declared but its value is never read.
+src/presentation/screens/RunCompletionScreen.tsx(79,5): error TS2554: Expected 1 arguments, but got 3.
+src/presentation/screens/SettingsScreen.tsx(81,49): error TS6133: 'navigation' is declared but its value is never read.
+src/shared/types/navigation.ts(4,1): error TS6133: 'StopTrackingResult' is declared but its value is never read.

@@ -7,20 +7,23 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
-  ActivityIndicator
+  ActivityIndicator,
+  Modal
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
+import { useRef } from 'react';
+import { Animated } from 'react-native';
+import LottieView from 'lottie-react-native';
 
 import { RootStackParamList } from '@/shared/types';
 import { StopTrackingResult, SaveRunUseCase } from '@/application/usecases';
+import { Run, GPSPoint } from '@/domain/entities';
 import { PersonalRecord } from '@/domain/entities/PersonalRecord';
 import { Achievement } from '@/domain/entities/Achievement';
 import { SQLiteRunRepository } from '@/infrastructure/persistence';
-import { SQLitePersonalRecordRepository } from '@/infrastructure/persistence/SQLitePersonalRecordRepository';
-import { SQLiteAchievementRepository } from '@/infrastructure/persistence/SQLiteAchievementRepository';
 
 type RunCompletionScreenRouteProp = RouteProp<RootStackParamList, 'RunCompletion'>;
 type RunCompletionScreenNavigationProp = StackNavigationProp<RootStackParamList, 'RunCompletion'>;
@@ -45,35 +48,41 @@ type SerializableStopTrackingResult = {
 export const RunCompletionScreen: React.FC<Props> = ({ route, navigation }) => {
   // Accept both serialized and deserialized payloads for compatibility
   const incoming = route.params.runData as SerializableStopTrackingResult | StopTrackingResult;
-  const runData: StopTrackingResult = 'startTime' in (incoming as any).run
-    ? {
-        run: {
-          ...(incoming as SerializableStopTrackingResult).run,
-          startTime: new Date((incoming as SerializableStopTrackingResult).run.startTime),
-          endTime: new Date((incoming as SerializableStopTrackingResult).run.endTime),
-          createdAt: new Date((incoming as SerializableStopTrackingResult).run.createdAt),
-          route: (incoming as SerializableStopTrackingResult).run.route.map(p => ({
-            ...p,
-            timestamp: new Date(p.timestamp),
-          })),
-        },
-        trackingPoints: (incoming as SerializableStopTrackingResult).trackingPoints.map(p => ({
-          ...p,
-          timestamp: new Date(p.timestamp),
-        })),
-      }
-    : (incoming as StopTrackingResult);
+
+  const isSerialized = (val: any): val is SerializableStopTrackingResult => {
+    return !!val && val.run && typeof val.run.startTime === 'string';
+  };
+
+  const deserialize = (val: SerializableStopTrackingResult | StopTrackingResult): StopTrackingResult => {
+    if (isSerialized(val)) {
+      const r = val.run;
+      const run: Run = {
+        ...(r as any),
+        startTime: new Date(r.startTime),
+        endTime: new Date(r.endTime),
+        createdAt: new Date(r.createdAt),
+        route: r.route.map(p => ({ ...p, timestamp: new Date(p.timestamp) } as GPSPoint)),
+      };
+      const trackingPoints: GPSPoint[] = val.trackingPoints.map(p => ({ ...p, timestamp: new Date(p.timestamp) } as GPSPoint));
+      return { run, trackingPoints };
+    }
+    return val as StopTrackingResult;
+  };
+
+  const runData: StopTrackingResult = deserialize(incoming);
   const [runName, setRunName] = useState('');
   const [notes, setNotes] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [showRouteMap, setShowRouteMap] = useState(false);
-  const [personalRecords, setPersonalRecords] = useState<PersonalRecord[]>([]);
-  const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [newPersonalRecords, setNewPersonalRecords] = useState<PersonalRecord[]>([]);
+  const [newAchievements, setNewAchievements] = useState<Achievement[]>([]);
+  const [showAchievementsModal, setShowAchievementsModal] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
   const [saveRunUseCase] = useState(() => new SaveRunUseCase(
-    new SQLiteRunRepository(),
-    new SQLitePersonalRecordRepository(),
-    new SQLiteAchievementRepository()
+    new SQLiteRunRepository()
   ));
+  const modalScale = useRef(new Animated.Value(0.9)).current;
+  const modalOpacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     // Generate default run name based on time of day
@@ -172,12 +181,28 @@ export const RunCompletionScreen: React.FC<Props> = ({ route, navigation }) => {
 
       if (result.success) {
         const { personalRecords: newRecords, achievements: newAchievements } = result.data;
-        setPersonalRecords(newRecords);
-        setAchievements(newAchievements);
+
+        // Store new PRs locally to show a badge section on this screen
+        setNewPersonalRecords(newRecords);
+        // Store new Achievements and open modal
+        setNewAchievements(newAchievements);
 
         // Show appropriate success message based on whether PRs or achievements were earned
         const hasRecords = newRecords.length > 0;
         const hasAchievements = newAchievements.length > 0;
+        if (hasAchievements) {
+          setShowAchievementsModal(true);
+          // animate modal in
+          modalScale.setValue(0.9);
+          modalOpacity.setValue(0);
+          Animated.parallel([
+            Animated.timing(modalScale, { toValue: 1, duration: 220, useNativeDriver: true }),
+            Animated.timing(modalOpacity, { toValue: 1, duration: 220, useNativeDriver: true })
+          ]).start();
+          // trigger confetti once
+          setShowConfetti(true);
+          setTimeout(() => setShowConfetti(false), 1800);
+        }
 
         if (hasRecords || hasAchievements) {
           let title = '';
@@ -288,6 +313,14 @@ export const RunCompletionScreen: React.FC<Props> = ({ route, navigation }) => {
 
   const { run } = runData;
 
+  const shareSummary = async () => {
+    const summary = `Run: ${runName}\n\nDate: ${run.startTime.toLocaleDateString()}\nDistance: ${(run.distance / 1000).toFixed(2)} km\nDuration: ${formatDuration(run.duration)}\nPace: ${formatPace(run.averagePace)}/km` + (notes ? `\n\nNotes: ${notes}` : '');
+    try {
+      const { Share } = require('react-native');
+      await Share.share({ title: runName, message: summary });
+    } catch {}
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
@@ -296,6 +329,22 @@ export const RunCompletionScreen: React.FC<Props> = ({ route, navigation }) => {
           <Text style={styles.title}>Run Complete!</Text>
           <Text style={styles.subtitle}>Great job! Here's your run summary</Text>
         </View>
+
+        {/* New Personal Records Banner */}
+        {newPersonalRecords.length > 0 && (
+          <View style={styles.prBanner}>
+            <View style={styles.prBannerHeader}>
+              <Ionicons name="trophy-outline" size={20} color="#fff" />
+              <Text style={styles.prBannerTitle}>New PR!</Text>
+            </View>
+            {newPersonalRecords.map((pr) => (
+              <View key={pr.id.value} style={styles.prItem}>
+                <Text style={styles.prItemTitle}>{pr.getDisplayTitle()}</Text>
+                <Text style={styles.prItemValue}>{pr.getDisplayValue()}</Text>
+              </View>
+            ))}
+          </View>
+        )}
 
         {/* Metrics Summary */}
         <View style={styles.metricsContainer}>
@@ -414,6 +463,15 @@ export const RunCompletionScreen: React.FC<Props> = ({ route, navigation }) => {
           )}
         </TouchableOpacity>
 
+        <TouchableOpacity
+          style={[styles.button, styles.secondaryButton]}
+          onPress={shareSummary}
+          disabled={isSaving}
+        >
+          <Ionicons name="share-outline" size={18} color="#FF6B35" />
+          <Text style={styles.secondaryButtonText}>Share Summary</Text>
+        </TouchableOpacity>
+
         <View style={styles.secondaryButtonContainer}>
           <TouchableOpacity
             style={[styles.button, styles.secondaryButton]}
@@ -434,9 +492,68 @@ export const RunCompletionScreen: React.FC<Props> = ({ route, navigation }) => {
           </TouchableOpacity>
         </View>
       </View>
+      {/* Achievements Modal */}
+      <Modal visible={showAchievementsModal} animationType="slide" transparent>
+        <View style={styles.modalBackdrop}>
+          {showConfetti && <ConfettiOverlay />}
+          <Animated.View style={[styles.modalCard, { transform: [{ scale: modalScale }], opacity: modalOpacity }]}>
+            <View style={styles.modalHeader}>
+              <Ionicons name="medal-outline" size={24} color="#FF6B35" />
+              <Text style={styles.modalTitle}>Achievements Unlocked!</Text>
+            </View>
+            <View style={styles.modalContent}>
+              {newAchievements.map(a => (
+                <View key={a.id.value} style={styles.achievementRow}>
+                  <View style={[styles.modalIcon, { backgroundColor: a.getColor() + '20' }]}>
+                    <Ionicons name={a.getIconName() as any} size={20} color={a.getColor()} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.achievementTitleText}>{a.title}</Text>
+                    <Text style={styles.achievementDescText}>{a.description}</Text>
+                  </View>
+                  <View style={styles.unlockedBadge}><Text style={styles.unlockedBadgeText}>Unlocked</Text></View>
+                  <TouchableOpacity onPress={async () => {
+                    try {
+                      const { Share } = require('react-native');
+                      await Share.share({ title: a.title, message: a.getShareText() });
+                    } catch {}
+                  }}>
+                    <Ionicons name="share-outline" size={20} color="#666" />
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </View>
+            <View style={styles.modalActions}>
+              <TouchableOpacity style={[styles.button, styles.secondaryButton]} onPress={() => {
+                setShowAchievementsModal(false);
+                navigation.navigate('Achievements');
+              }}>
+                <Ionicons name="list-outline" size={16} color="#FF6B35" />
+                <Text style={styles.secondaryButtonText}>View All</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.button, styles.primaryButton]} onPress={() => setShowAchievementsModal(false)}>
+                <Ionicons name="checkmark" size={18} color="#fff" />
+                <Text style={styles.primaryButtonText}>Awesome!</Text>
+              </TouchableOpacity>
+            </View>
+          </Animated.View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
+
+// Confetti overlay using Lottie (fixed)
+const ConfettiOverlay: React.FC = () => (
+  <View style={styles.confettiContainer} pointerEvents="none">
+    <LottieView
+      source={require('../../../assets/animations/confetti.json')}
+      autoPlay
+      loop={false}
+      style={{ width: '100%', height: '100%' }}
+    />
+  </View>
+);
 
 const styles = StyleSheet.create({
   container: {
@@ -620,5 +737,113 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     marginLeft: 4
+  }
+  ,
+  prBanner: {
+    backgroundColor: '#FF6B35',
+    padding: 12,
+    marginHorizontal: 20,
+    marginBottom: 16,
+    borderRadius: 12
+  },
+  prBannerHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8
+  },
+  prBannerTitle: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '700',
+    marginLeft: 8
+  },
+  prItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 4
+  },
+  prItemTitle: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600'
+  },
+  prItemValue: {
+    color: '#fff',
+    fontSize: 14
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20
+  },
+  modalCard: {
+    width: '100%',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16
+  },
+  confettiContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12
+  },
+  modalTitle: {
+    marginLeft: 8,
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#333'
+  },
+  modalContent: {
+    marginBottom: 12
+  },
+  achievementRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+    marginBottom: 10
+  },
+  modalIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  achievementTitleText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#333'
+  },
+  achievementDescText: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 2
+  },
+  modalActions: {
+    flexDirection: 'row',
+    gap: 12
+  },
+  unlockedBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#fff0e9',
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    marginRight: 8
+  },
+  unlockedBadgeText: {
+    color: '#FF6B35',
+    fontSize: 10,
+    fontWeight: '700',
+    textTransform: 'uppercase'
   }
 });

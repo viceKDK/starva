@@ -1,7 +1,6 @@
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { CompositeScreenProps } from '@react-navigation/native';
 import { StackScreenProps } from '@react-navigation/stack';
-import { StopTrackingResult } from '@/application/usecases';
 
 export type RootTabParamList = {
   Tracking: undefined;

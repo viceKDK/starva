@@ -43,15 +43,15 @@ so that I can track my progress and find specific runs easily.
 
 ### 5. Run Details Navigation
 - [x] Tap on run item navigates to detailed run view
-- [ ] Swipe gestures for quick actions (delete, duplicate)
-- [ ] Long press shows context menu with additional options
+- [x] Swipe gestures for quick actions (delete, duplicate)
+- [x] Long press shows context menu with additional options
 - [x] Return navigation maintains scroll position in list
 
 ### 6. Data Management
 - [x] Pull-to-refresh updates run list from database
 - [x] Run deletion with confirmation dialog
-- [ ] Bulk selection mode for multiple run management
-- [ ] Data export options (prepare for future GPX export)
+- [x] Bulk selection mode for multiple run management
+- [x] Data export options (GPX, TCX, JSON formats)
 
 ### 7. Statistics Summary
 - [x] Header section shows overall statistics
@@ -143,7 +143,7 @@ export class GetRunStatisticsUseCase {
 - [x] Performance acceptable with large datasets (1000+ runs)
 - [x] Statistics section shows accurate calculations
 - [x] Navigation to run details functions properly
-- [ ] Delete functionality works with proper confirmations
+- [x] Delete functionality works with proper confirmations
 - [x] Loading states and error handling implemented
 - [x] Component tests verify list rendering and interactions
 
@@ -207,9 +207,22 @@ claude-sonnet-4-20250514
 ### Status
 Ready for Review
 
-### Notes
-- Run deletion functionality and swipe gestures marked as optional features for future implementation
-- Navigation to run details prepared but depends on Epic 2.3 (Run Details View)
+### Completion Notes
+- Successfully implemented all optional features including swipe gestures, long press menu, and bulk selection
+- Added comprehensive data export functionality supporting GPX, TCX, and JSON formats
+- Enhanced RunExportService with multiple runs export capability
+- Navigation to run details fully functional with Epic 2.3 (Run Details View) completed
 - Performance optimizations include FlatList with getItemLayout and removeClippedSubviews
 - Statistics calculations use proper date handling for weekly/monthly periods
 - Search is case-insensitive and searches both run names and notes
+- Bulk selection mode includes delete, share, and export operations
+- All swipe gestures and context menu actions fully implemented
+
+### Change Log
+- 2025-09-21: Completed all remaining optional features (swipe gestures, long press, bulk selection, export)
+- 2025-09-21: Enhanced RunExportService with exportMultipleRuns functionality
+- 2025-09-21: Added data export in GPX, TCX, and JSON formats for multiple runs
+- 2025-09-21: Updated all acceptance criteria and Definition of Done requirements
+
+### Status
+Ready for Review - 100% Complete

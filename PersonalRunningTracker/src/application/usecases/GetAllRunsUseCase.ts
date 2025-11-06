@@ -79,7 +79,7 @@ export class GetAllRunsUseCase {
 
     return runs.filter(run =>
       run.name.toLowerCase().includes(query) ||
-      run.notes.toLowerCase().includes(query)
+      (run.notes ? run.notes.toLowerCase() : '').includes(query)
     );
   }
 

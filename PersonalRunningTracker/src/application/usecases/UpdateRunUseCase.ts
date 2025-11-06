@@ -30,7 +30,7 @@ export class UpdateRunUseCase {
       const updatedRun: Run = {
         ...currentRun,
         name: updates.name?.trim() || currentRun.name,
-        notes: updates.notes?.trim() || currentRun.notes
+        ...(updates.notes !== undefined ? { notes: updates.notes.trim() } : {})
       };
 
       // Update in repository

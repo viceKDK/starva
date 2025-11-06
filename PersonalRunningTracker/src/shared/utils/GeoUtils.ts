@@ -72,7 +72,7 @@ export class GeoUtils {
 
     let totalDistance = 0;
     for (let i = 1; i < route.length; i++) {
-      totalDistance += this.calculateDistance(route[i - 1], route[i], {
+      totalDistance += this.calculateDistance(route[i - 1]!, route[i]!, {
         ...options,
         precision: -1 // Don't round intermediate calculations
       });
@@ -196,11 +196,11 @@ export class GeoUtils {
   ): GPSPoint[] {
     if (route.length < 3) return route;
 
-    const smoothed: GPSPoint[] = [route[0]]; // Always keep first point
+    const smoothed: GPSPoint[] = [route[0]!]; // Always keep first point
 
     for (let i = 1; i < route.length - 1; i++) {
-      const current = route[i];
-      const previous = smoothed[smoothed.length - 1];
+      const current = route[i]!;
+      const previous = smoothed[smoothed.length - 1]!;
 
       // Check accuracy filter
       if (current.accuracy && current.accuracy > maxAccuracyMeters) {
@@ -218,7 +218,7 @@ export class GeoUtils {
 
     // Always keep last point
     if (route.length > 1) {
-      smoothed.push(route[route.length - 1]);
+      smoothed.push(route[route.length - 1]!);
     }
 
     return smoothed;
@@ -233,11 +233,11 @@ export class GeoUtils {
   ): GPSPoint[] {
     if (route.length < 2) return route;
 
-    const interpolated: GPSPoint[] = [route[0]];
+    const interpolated: GPSPoint[] = [route[0]!];
 
     for (let i = 1; i < route.length; i++) {
-      const previous = route[i - 1];
-      const current = route[i];
+      const previous = route[i - 1]!;
+      const current = route[i]!;
       const timeDiff = (current.timestamp.getTime() - previous.timestamp.getTime()) / 1000;
 
       if (timeDiff > maxGapSeconds) {
@@ -250,7 +250,7 @@ export class GeoUtils {
             longitude: previous.longitude + (current.longitude - previous.longitude) * ratio,
             timestamp: new Date(previous.timestamp.getTime() + timeDiff * ratio * 1000),
             accuracy: Math.max(previous.accuracy || 0, current.accuracy || 0),
-            altitude: previous.altitude && current.altitude
+            altitude: (previous.altitude != null && current.altitude != null)
               ? previous.altitude + (current.altitude - previous.altitude) * ratio
               : undefined
           };
@@ -271,7 +271,7 @@ export class GeoUtils {
     if (route.length < 2) return 1;
 
     const actualDistance = this.calculateRouteDistance(route);
-    const straightLineDistance = this.calculateDistance(route[0], route[route.length - 1]);
+    const straightLineDistance = this.calculateDistance(route[0]!, route[route.length - 1]!);
 
     if (straightLineDistance === 0) return 1;
     return straightLineDistance / actualDistance;

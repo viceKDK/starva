@@ -15,6 +15,7 @@ const Tab = createBottomTabNavigator<RootTabParamList>();
 const TabNavigator: React.FC = () => {
   return (
     <Tab.Navigator
+      id="TabNavigator"
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
           let iconName: keyof typeof Ionicons.glyphMap;
@@ -80,6 +81,7 @@ export const AppNavigator: React.FC = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
+        id="StackNavigator"
         screenOptions={{
           headerStyle: {
             backgroundColor: '#FF6B35',
@@ -95,30 +97,27 @@ export const AppNavigator: React.FC = () => {
           component={TabNavigator}
           options={{ headerShown: false }}
         />
-        <Stack.Screen
-          name="RunCompletion"
-          component={RunCompletionScreen}
-          options={{
-            title: 'Run Summary',
-            headerBackTitleVisible: false
-          }}
-        />
-        <Stack.Screen
-          name="RunDetail"
-          component={RunDetailsScreen}
-          options={{
-            title: 'Run Details',
-            headerBackTitleVisible: false
-          }}
-        />
-        <Stack.Screen
-          name="Achievements"
-          component={AchievementsScreen}
-          options={{
-            title: 'Achievements',
-            headerBackTitleVisible: false
-          }}
-        />
+      <Stack.Screen
+        name="RunCompletion"
+        component={RunCompletionScreen}
+        options={{
+            title: 'Run Summary'
+        }}
+      />
+      <Stack.Screen
+        name="RunDetail"
+        component={RunDetailsScreen}
+        options={{
+            title: 'Run Details'
+        }}
+      />
+      <Stack.Screen
+        name="Achievements"
+        component={AchievementsScreen}
+        options={{
+            title: 'Achievements'
+        }}
+      />
       </Stack.Navigator>
 
       {/* Session Recovery Dialog */}

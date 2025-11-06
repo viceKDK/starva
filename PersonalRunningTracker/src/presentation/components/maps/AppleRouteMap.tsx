@@ -31,7 +31,7 @@ export const AppleRouteMap: React.FC<RouteMapProps> = ({ points, enableAnimation
   const coords = useMemo(() => points.map(p => ({ latitude: p.latitude, longitude: p.longitude })), [points]);
 
   useEffect(() => {
-    setAnimatedCoords(coords.length ? [coords[0]] : []);
+    setAnimatedCoords(coords.length ? [coords[0]!] : []);
     indexRef.current = 1;
     if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
     setAnimating(false);

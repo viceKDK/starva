@@ -1,4 +1,3 @@
-import * as SQLite from 'expo-sqlite';
 import { Achievement, AchievementId, AchievementType, AchievementCriteria } from '@/domain/entities/Achievement';
 import { IAchievementRepository } from '@/domain/repositories/IAchievementRepository';
 import { Result } from '@/shared/types';
@@ -34,6 +33,34 @@ export class SQLiteAchievementRepository implements IAchievementRepository {
     } catch (error: any) {
       console.error('Failed to save achievement:', error);
       return { success: false, error: `Failed to save achievement: ${error.message || String(error)}` };
+    }
+  }
+
+  async saveMany(achievements: Achievement[]): Promise<Result<void, string>> {
+    const conn = await this.databaseService.initialize();
+    if (!conn.success) return { success: false, error: 'Failed to connect to database' };
+
+    try {
+      for (const achievement of achievements) {
+        await conn.data!.database.runAsync(
+          `INSERT OR REPLACE INTO achievements
+           (id, type, title, description, criteria, earned_at, run_id)
+           VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          [
+            achievement.id.value,
+            achievement.type,
+            achievement.title,
+            achievement.description,
+            JSON.stringify(achievement.criteria),
+            achievement.earnedAt?.toISOString() || null,
+            achievement.runId?.value || null
+          ]
+        );
+      }
+      return { success: true, data: undefined };
+    } catch (error: any) {
+      console.error('Failed to save achievements:', error);
+      return { success: false, error: `Failed to save achievements: ${error.message || String(error)}` };
     }
   }
 

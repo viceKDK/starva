@@ -2,7 +2,6 @@ import React, { useMemo } from 'react';
 import { Image, View, StyleSheet } from 'react-native';
 import { GPSPoint } from '@/domain/entities';
 import { GeoUtils } from '@/shared/utils/GeoUtils';
-import { MapboxProvider } from '@/infrastructure/maps/MapboxProvider';
 import { MapboxConfig, hasMapboxToken } from '@/shared/config/MapboxConfig';
 
 type Props = {
@@ -17,22 +16,26 @@ export const StaticMapboxImage: React.FC<Props> = ({ points, width, height }) =>
 
     // If Mapbox token exists, use Mapbox Static Images API
     if (hasMapboxToken()) {
-      const provider = new MapboxProvider();
-      provider.initialize({ accessToken: MapboxConfig.ACCESS_TOKEN, styleId: MapboxConfig.STYLE_ID });
-      const region = provider.calculateRouteRegion(points, 0.15);
-      const markers = provider.createRouteMarkers(points);
-      const polyline = provider.createRoutePolyline(points);
-      return provider
-        .generateStaticMap({
-          width,
-          height,
-          region,
-          markers,
-          polylines: [polyline],
-          format: 'png',
-        })
-        .then(s => s.uri)
-        .catch(() => null);
+      try {
+        const mod = require('@/infrastructure/maps/MapboxProvider');
+        const Provider = mod.MapboxProvider || mod.default;
+        const provider = new Provider();
+        provider.initialize({ accessToken: MapboxConfig.ACCESS_TOKEN, styleId: MapboxConfig.STYLE_ID });
+        const region = provider.calculateRouteRegion(points, 0.15);
+        const markers = provider.createRouteMarkers(points);
+        const polyline = provider.createRoutePolyline(points);
+        return provider
+          .generateStaticMap({
+            width,
+            height,
+            region,
+            markers,
+            polylines: [polyline],
+            format: 'png',
+          })
+          .then((s: any) => s.uri)
+          .catch(() => null);
+      } catch {}
     }
 
     // Fallback: Use OSM static map service (no API key). For dev/testing only.
@@ -51,8 +54,9 @@ export const StaticMapboxImage: React.FC<Props> = ({ points, width, height }) =>
       .map(p => `${p.latitude.toFixed(6)},${p.longitude.toFixed(6)}`)
       .join('|');
 
-    const start = `${points[0].latitude.toFixed(6)},${points[0].longitude.toFixed(6)},green`;
-    const endPt = points[points.length - 1];
+    const startPt = points[0]!;
+    const endPt = points[points.length - 1]!;
+    const start = `${startPt.latitude.toFixed(6)},${startPt.longitude.toFixed(6)},green`;
     const end = `${endPt.latitude.toFixed(6)},${endPt.longitude.toFixed(6)},red`;
 
     // staticmap.openstreetmap.de
