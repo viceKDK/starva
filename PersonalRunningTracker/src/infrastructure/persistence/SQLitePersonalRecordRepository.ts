@@ -1,4 +1,3 @@
-import * as SQLite from 'expo-sqlite';
 import { PersonalRecord, PersonalRecordId, RecordCategory } from '@/domain/entities/PersonalRecord';
 import { IPersonalRecordRepository } from '@/domain/repositories/IPersonalRecordRepository';
 import { Result } from '@/shared/types';

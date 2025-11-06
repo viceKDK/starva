@@ -14,6 +14,8 @@ import { Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { Swipeable } from 'react-native-gesture-handler';
+import { ActionSheetIOS, Platform } from 'react-native';
 
 import { RootTabScreenProps } from '@/shared/types';
 import { Run } from '@/domain/entities';
@@ -25,15 +27,18 @@ import {
   RunStatistics
 } from '@/application/usecases';
 import { SQLiteRunRepository } from '@/infrastructure/persistence';
+import { RunExportService } from '@/infrastructure/export/RunExportService';
 
 type Props = RootTabScreenProps<'History'>;
 
 interface RunListItemProps {
   run: Run;
   onPress: (run: Run) => void;
+  onDelete: (run: Run) => void;
+  onDuplicate: (run: Run) => void;
 }
 
-const RunListItem: React.FC<RunListItemProps> = ({ run, onPress }) => {
+const RunListItem: React.FC<RunListItemProps> = ({ run, onPress, onDelete, onDuplicate }) => {
   const thumbWidth = Math.round(Dimensions.get('window').width - 40);
   const thumbHeight = 120;
   const formatDate = (date: Date): string => {
@@ -72,8 +77,51 @@ const RunListItem: React.FC<RunListItemProps> = ({ run, onPress }) => {
 
   const hasRoute = run.route && run.route.length > 1;
 
+  const RightActions = () => (
+    <View style={{ flexDirection: 'row', alignItems: 'stretch' }}>
+      <TouchableOpacity
+        onPress={() => onDuplicate(run)}
+        style={{ backgroundColor: '#0d6efd', justifyContent: 'center', paddingHorizontal: 16 }}
+      >
+        <Ionicons name="copy-outline" size={22} color="#fff" />
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => onDelete(run)}
+        style={{ backgroundColor: '#dc3545', justifyContent: 'center', paddingHorizontal: 16 }}
+      >
+        <Ionicons name="trash-outline" size={22} color="#fff" />
+      </TouchableOpacity>
+    </View>
+  );
+
+  const openContextMenu = () => {
+    if (Platform.OS === 'ios') {
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          options: ['Cancel', 'Open', 'Duplicate', 'Delete'],
+          destructiveButtonIndex: 3,
+          cancelButtonIndex: 0,
+          userInterfaceStyle: 'light',
+        },
+        (index) => {
+          if (index === 1) onPress(run);
+          if (index === 2) onDuplicate(run);
+          if (index === 3) onDelete(run);
+        }
+      );
+    } else {
+      Alert.alert('Run Options', run.name, [
+        { text: 'Open', onPress: () => onPress(run) },
+        { text: 'Duplicate', onPress: () => onDuplicate(run) },
+        { text: 'Delete', style: 'destructive', onPress: () => onDelete(run) },
+        { text: 'Cancel', style: 'cancel' },
+      ]);
+    }
+  };
+
   return (
-    <TouchableOpacity style={styles.runItem} onPress={() => onPress(run)}>
+    <Swipeable renderRightActions={RightActions} overshootRight={false}>
+    <TouchableOpacity style={styles.runItem} onPress={() => onPress(run)} onLongPress={openContextMenu}>
       <View style={styles.runItemHeader}>
         <View style={styles.runItemLeft}>
           <Text style={styles.runDate}>{formatDate(run.startTime)}</Text>
@@ -105,6 +153,7 @@ const RunListItem: React.FC<RunListItemProps> = ({ run, onPress }) => {
         </View>
       </View>
     </TouchableOpacity>
+    </Swipeable>
   );
 };
 
@@ -255,6 +304,8 @@ export const HistoryScreen: React.FC<Props> = ({ navigation }) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [sortOption, setSortOption] = useState<SortOption>('date-desc');
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   // Initialize use cases
   const getAllRunsUseCase = useMemo(() => new GetAllRunsUseCase(new SQLiteRunRepository()), []);
@@ -272,7 +323,7 @@ export const HistoryScreen: React.FC<Props> = ({ navigation }) => {
       const [runsResult, statsResult] = await Promise.all([
         getAllRunsUseCase.execute({
           sortBy: sortOption,
-          searchQuery: searchQuery.trim() || undefined,
+          ...(searchQuery.trim() ? { searchQuery: searchQuery.trim() } : {}),
           limit: 50 // Initial load limit
         }),
         getStatisticsUseCase.execute()
@@ -314,16 +365,129 @@ export const HistoryScreen: React.FC<Props> = ({ navigation }) => {
   );
 
   const handleRunPress = useCallback((run: Run) => {
+    if (selectionMode) {
+      setSelectedIds(prev => {
+        const next = new Set(prev);
+        if (next.has(run.id)) next.delete(run.id); else next.add(run.id);
+        return next;
+      });
+      return;
+    }
     navigation.navigate('RunDetail', { runId: run.id });
-  }, [navigation]);
+  }, [navigation, selectionMode]);
 
   const handleRefresh = useCallback(() => {
     loadData(true);
   }, [loadData]);
 
+  const repository = useMemo(() => new SQLiteRunRepository(), []);
+
+  const exportSelectedRuns = useCallback(async () => {
+    const selectedRuns = runs.filter(r => selectedIds.has(r.id));
+    if (selectedRuns.length === 0) return;
+
+    if (Platform.OS === 'ios') {
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          options: ['Cancel', 'Export GPX', 'Export TCX', 'Export JSON'],
+          cancelButtonIndex: 0,
+          userInterfaceStyle: 'light',
+        },
+        async (index) => {
+          if (index === 0) return;
+
+          const format = index === 1 ? 'gpx' : index === 2 ? 'tcx' : 'json';
+
+          try {
+            const result = await RunExportService.exportMultipleRuns(selectedRuns, format);
+            if (result.success) {
+              Alert.alert('Export Success', `${selectedRuns.length} runs exported successfully!`);
+            } else {
+              Alert.alert('Export Failed', result.error || 'Unknown error occurred');
+            }
+          } catch (error) {
+            Alert.alert('Export Failed', 'Failed to export selected runs');
+          }
+        }
+      );
+    } else {
+      Alert.alert('Export Format', 'Choose export format:', [
+        { text: 'GPX', onPress: () => exportRuns(selectedRuns, 'gpx') },
+        { text: 'TCX', onPress: () => exportRuns(selectedRuns, 'tcx') },
+        { text: 'JSON', onPress: () => exportRuns(selectedRuns, 'json') },
+        { text: 'Cancel', style: 'cancel' },
+      ]);
+    }
+  }, [runs, selectedIds]);
+
+  const exportRuns = async (runsToExport: Run[], format: 'gpx' | 'tcx' | 'json') => {
+    try {
+      const result = await RunExportService.exportMultipleRuns(runsToExport, format);
+      if (result.success) {
+        Alert.alert('Export Success', `${runsToExport.length} runs exported successfully!`);
+      } else {
+        Alert.alert('Export Failed', result.error || 'Unknown error occurred');
+      }
+    } catch (error) {
+      Alert.alert('Export Failed', 'Failed to export runs');
+    }
+  };
+
+  const duplicateRun = useCallback(async (run: Run) => {
+    const newId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const copy: Run = {
+      ...run,
+      id: newId,
+      name: `${run.name} (Copy)`,
+      createdAt: new Date(),
+      // keep other fields and route intact
+    };
+    try {
+      const result = await repository.save(copy);
+      if (!result.success) {
+        Alert.alert('Error', 'Failed to duplicate run');
+      } else {
+        loadData();
+      }
+    } catch (e) {
+      Alert.alert('Error', 'Failed to duplicate run');
+    }
+  }, [repository, loadData]);
+
+  const deleteRun = useCallback(async (run: Run) => {
+    Alert.alert('Delete Run', `Delete "${run.name}"?`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete', style: 'destructive', onPress: async () => {
+          try {
+            const res = await repository.delete(run.id);
+            if (!res.success) {
+              Alert.alert('Error', 'Failed to delete run');
+            } else {
+              loadData();
+            }
+          } catch (e) {
+            Alert.alert('Error', 'Failed to delete run');
+          }
+        }
+      }
+    ]);
+  }, [repository, loadData]);
+
   const renderRunItem = useCallback(({ item }: { item: Run }) => (
-    <RunListItem run={item} onPress={handleRunPress} />
-  ), [handleRunPress]);
+    <View>
+      {selectionMode && (
+        <View style={{ position: 'absolute', right: 20, top: 20, zIndex: 1 }}>
+          <Ionicons
+            name={selectedIds.has(item.id) ? 'checkmark-circle' : 'ellipse-outline'}
+            size={22}
+            color={selectedIds.has(item.id) ? '#FF6B35' : '#ccc'}
+          />
+        </View>
+      )}
+      <RunListItem run={item} onPress={handleRunPress} onDelete={deleteRun} onDuplicate={duplicateRun} />
+    </View>
+  ), [handleRunPress, deleteRun, duplicateRun, selectionMode, selectedIds]);
 
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
@@ -368,6 +532,12 @@ export const HistoryScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Selection mode toggle */}
+      <View style={{ paddingHorizontal: 16, paddingTop: 8, alignItems: 'flex-end' }}>
+        <TouchableOpacity onPress={() => { setSelectionMode(!selectionMode); setSelectedIds(new Set()); }}>
+          <Text style={{ color: '#FF6B35', fontWeight: '600' }}>{selectionMode ? 'Cancel' : 'Select'}</Text>
+        </TouchableOpacity>
+      </View>
       <FlatList
         data={runs}
         renderItem={renderRunItem}
@@ -394,6 +564,44 @@ export const HistoryScreen: React.FC<Props> = ({ navigation }) => {
           index,
         })}
       />
+      {selectionMode && selectedIds.size > 0 && (
+        <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, backgroundColor: '#fff', borderTopWidth: 1, borderTopColor: '#e0e0e0', padding: 12, flexDirection: 'row', justifyContent: 'space-around' }}>
+          <TouchableOpacity onPress={async () => {
+            const ids = Array.from(selectedIds);
+            Alert.alert('Delete Selected', `Delete ${ids.length} runs?`, [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Delete', style: 'destructive', onPress: async () => {
+                for (const id of ids) { await repository.delete(id); }
+                setSelectedIds(new Set());
+                loadData();
+              }}
+            ]);
+          }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Ionicons name="trash-outline" size={18} color="#F44336" />
+              <Text style={{ color: '#F44336', marginLeft: 6, fontWeight: '600' }}>Delete Selected</Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => {
+            const summaries = runs.filter(r => selectedIds.has(r.id)).map(r => `${r.name} • ${(r.distance/1000).toFixed(2)} km, ${Math.floor(r.duration/60)}m`);
+            const message = summaries.join('\n');
+            const { Share } = require('react-native');
+            Share.share({ title: 'Selected Runs', message }).catch(() => {});
+          }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Ionicons name="share-outline" size={18} color="#0d6efd" />
+              <Text style={{ color: '#0d6efd', marginLeft: 6, fontWeight: '600' }}>Share</Text>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={exportSelectedRuns}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Ionicons name="download-outline" size={18} color="#28a745" />
+              <Text style={{ color: '#28a745', marginLeft: 6, fontWeight: '600' }}>Export</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+      )}
     </SafeAreaView>
   );
 };

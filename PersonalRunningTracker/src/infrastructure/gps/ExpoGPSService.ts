@@ -12,13 +12,13 @@ export class ExpoGPSService implements IGPSService {
   private isPaused = false;
   private lastValidLocation: GPSPoint | null = null;
 
-  // Configuration constants
-  private readonly GPS_TIMEOUT = 10000; // 10 seconds
-  private readonly MAX_ACCURACY_THRESHOLD = 100; // tolerate up to 100m to allow initial fix
-  private readonly MIN_TIME_INTERVAL = 1000; // 1 second
-  private readonly MIN_DISTANCE_INTERVAL = 5; // 5 meters
+  // Configuration constants - iOS Maps style
+  private readonly GPS_TIMEOUT = 5000; // 5 seconds for faster detection
+  private readonly MAX_ACCURACY_THRESHOLD = 100; // 100m is acceptable for running
+  private readonly MIN_TIME_INTERVAL = 1000; // 1 second is enough for running
+  private readonly MIN_DISTANCE_INTERVAL = 5; // 5 meters to avoid GPS noise
   private readonly MAX_SPEED_THRESHOLD = 50; // 50 km/h
-  private readonly MIN_TIME_BETWEEN_POINTS = 800; // 0.8 seconds
+  private readonly MIN_TIME_BETWEEN_POINTS = 1000; // 1 second between points
 
   async startTracking(): Promise<Result<void, GPSError>> {
     try {
@@ -44,13 +44,15 @@ export class ExpoGPSService implements IGPSService {
       this.isPaused = false;
       this.lastValidLocation = null;
 
-      // Start location tracking
+      // Start location tracking with BestForNavigation like iOS Maps
       this.subscription = await Location.watchPositionAsync(
         {
-          // Balanced improves time-to-first-fix in Expo Go; we can raise later
-          accuracy: Location.Accuracy.Balanced,
+          // BestForNavigation is the iOS Maps equivalent - detects location instantly
+          accuracy: Location.Accuracy.BestForNavigation,
           timeInterval: this.MIN_TIME_INTERVAL,
           distanceInterval: this.MIN_DISTANCE_INTERVAL,
+          // Enable all sensors for faster detection
+          mayShowUserSettingsDialog: true,
         },
         (location) => {
           if (!this.isPaused) {
@@ -133,11 +135,12 @@ export class ExpoGPSService implements IGPSService {
         return Err('GPS_DISABLED');
       }
 
-      // Get current location with timeout
+      // Get current location with timeout - BestForNavigation for instant detection
       const location = await Location.getCurrentPositionAsync({
-        // Balanced improves time-to-first-fix in Expo Go
-        accuracy: Location.Accuracy.Balanced,
+        // BestForNavigation is the iOS Maps equivalent
+        accuracy: Location.Accuracy.BestForNavigation,
         timeInterval: this.GPS_TIMEOUT,
+        maximumAge: 1000, // Accept locations up to 1 second old for faster response
       });
 
       const gpsPoint = this.locationToGPSPoint(location);
@@ -233,11 +236,11 @@ export class ExpoGPSService implements IGPSService {
       return Err('INVALID_LOCATION');
     }
 
-    // Check accuracy threshold
+    // Check accuracy threshold - allow up to 100m like consumer GPS devices
+    // Accept first point even with poor accuracy for instant detection
     if (typeof point.accuracy === 'number' && point.accuracy > this.MAX_ACCURACY_THRESHOLD) {
-      // Allow the very first point even if accuracy is poor to exit "acquiring" state;
-      // subsequent points will improve accuracy and validation will apply normally.
-      if (this.lastValidLocation) {
+      if (this.lastValidLocation && this.trackingPoints.length > 3) {
+        // Only reject after we have a few points, to allow GPS to stabilize
         return Err('ACCURACY_TOO_LOW');
       }
     }

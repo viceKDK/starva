@@ -44,8 +44,8 @@ export const SessionRecoveryDialog: React.FC<SessionRecoveryDialogProps> = ({
 
     let totalDistance = 0;
     for (let i = 1; i < sessionData.trackingPoints.length; i++) {
-      const prev = sessionData.trackingPoints[i - 1];
-      const curr = sessionData.trackingPoints[i];
+      const prev = sessionData.trackingPoints[i - 1]!;
+      const curr = sessionData.trackingPoints[i]!;
 
       // Haversine formula for distance calculation
       const R = 6371000; // Earth's radius in meters

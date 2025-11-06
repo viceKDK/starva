@@ -1,4 +1,4 @@
-import { UserPreferences, UserPreferencesEntity } from '../entities/UserPreferences';
+import { UserPreferencesEntity } from '../entities/UserPreferences';
 import { Result } from '@/shared/types';
 
 export interface IUserPreferencesRepository {

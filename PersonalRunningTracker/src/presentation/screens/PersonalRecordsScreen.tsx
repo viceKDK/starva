@@ -7,29 +7,29 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
-  RefreshControl
+  RefreshControl,
+  Share
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { RootTabScreenProps } from '@/shared/types';
 import { Ionicons } from '@expo/vector-icons';
 
-import { RootStackParamList } from '@/shared/types';
 import { PersonalRecord } from '@/domain/entities/PersonalRecord';
 import { GetAllPersonalRecordsUseCase } from '@/application/usecases/GetAllPersonalRecordsUseCase';
+import { BackfillPersonalRecordsUseCase } from '@/application/usecases/BackfillPersonalRecordsUseCase';
+import { SQLiteRunRepository } from '@/infrastructure/persistence/SQLiteRunRepository';
 import { SQLitePersonalRecordRepository } from '@/infrastructure/persistence/SQLitePersonalRecordRepository';
 
-type PersonalRecordsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'PersonalRecords'>;
-
-interface Props {
-  navigation: PersonalRecordsScreenNavigationProp;
-}
+type Props = RootTabScreenProps<'PersonalRecords'>;
 
 interface PersonalRecordItemProps {
   record: PersonalRecord;
   onPress: () => void;
+  onShare: () => void;
+  onDelete: () => void;
 }
 
-const PersonalRecordItem: React.FC<PersonalRecordItemProps> = ({ record, onPress }) => {
+const PersonalRecordItem: React.FC<PersonalRecordItemProps> = ({ record, onPress, onShare, onDelete }) => {
   const getIconName = (category: string): keyof typeof Ionicons.glyphMap => {
     switch (category) {
       case 'LONGEST_DISTANCE':
@@ -76,7 +76,12 @@ const PersonalRecordItem: React.FC<PersonalRecordItemProps> = ({ record, onPress
       </View>
 
       <View style={styles.recordChevron}>
-        <Ionicons name="chevron-forward" size={20} color="#666" />
+        <TouchableOpacity onPress={onShare} style={{ marginRight: 8 }}>
+          <Ionicons name="share-outline" size={18} color="#666" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={onDelete}>
+          <Ionicons name="trash-outline" size={18} color="#F44336" />
+        </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );
@@ -103,9 +108,10 @@ interface StatsHeaderProps {
   totalRecords: number;
   latestRecord?: PersonalRecord;
   onViewAchievements: () => void;
+  onRecalculate: () => void;
 }
 
-const StatsHeader: React.FC<StatsHeaderProps> = ({ totalRecords, latestRecord, onViewAchievements }) => (
+const StatsHeader: React.FC<StatsHeaderProps> = ({ totalRecords, latestRecord, onViewAchievements, onRecalculate }) => (
   <View>
     <View style={styles.statsHeader}>
       <View style={styles.statItem}>
@@ -124,6 +130,10 @@ const StatsHeader: React.FC<StatsHeaderProps> = ({ totalRecords, latestRecord, o
       <Ionicons name="medal-outline" size={20} color="#FF6B35" />
       <Text style={styles.achievementsButtonText}>View Achievements</Text>
       <Ionicons name="chevron-forward" size={20} color="#FF6B35" />
+    </TouchableOpacity>
+    <TouchableOpacity style={styles.recalcButton} onPress={onRecalculate}>
+      <Ionicons name="refresh" size={18} color="#FF6B35" />
+      <Text style={styles.recalcButtonText}>Recalculate Records</Text>
     </TouchableOpacity>
   </View>
 );
@@ -152,7 +162,23 @@ export const PersonalRecordsScreen: React.FC<Props> = ({ navigation }) => {
       const result = await getAllRecordsUseCase.execute();
 
       if (result.success) {
-        setRecords(result.data);
+        if (result.data.length === 0) {
+          // Attempt one-time backfill from historical runs
+          const backfill = new BackfillPersonalRecordsUseCase(new SQLiteRunRepository());
+          const backfillResult = await backfill.execute();
+          if (!backfillResult.success) {
+            console.error('Backfill of personal records failed:', backfillResult.error);
+          }
+          // Reload after backfill
+          const reload = await getAllRecordsUseCase.execute();
+          if (reload.success) {
+            setRecords(reload.data);
+          } else {
+            setRecords([]);
+          }
+        } else {
+          setRecords(result.data);
+        }
       } else {
         setError('Failed to load personal records');
         Alert.alert('Error', 'Failed to load personal records');
@@ -177,12 +203,56 @@ export const PersonalRecordsScreen: React.FC<Props> = ({ navigation }) => {
     navigation.navigate('RunDetail', { runId: record.runId.value });
   };
 
+  const handleRecordShare = async (record: PersonalRecord) => {
+    try {
+      const message = `New Personal Record: ${record.getDisplayTitle()}\nValue: ${record.getDisplayValue()}\nAchieved on ${record.achievedAt.toLocaleDateString()}`;
+      await Share.share({ message, title: 'Personal Record' });
+    } catch {}
+  };
+
+  const handleRecordDelete = async (record: PersonalRecord) => {
+    Alert.alert(
+      'Remove Record',
+      `Delete ${record.getDisplayTitle()}? This will not delete the run.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete', style: 'destructive',
+          onPress: async () => {
+            const { SQLitePersonalRecordRepository } = await import('@/infrastructure/persistence/SQLitePersonalRecordRepository');
+            const repo = new SQLitePersonalRecordRepository();
+            const res = await repo.deleteById(record.id);
+            if (!res.success) {
+              Alert.alert('Error', 'Failed to delete record');
+            }
+            await loadRecords();
+          }
+        }
+      ]
+    );
+  };
+
   const handleStartRun = () => {
     navigation.navigate('Tracking');
   };
 
   const handleViewAchievements = () => {
     navigation.navigate('Achievements');
+  };
+
+  const handleRecalculate = async () => {
+    try {
+      const { SQLitePersonalRecordRepository } = await import('@/infrastructure/persistence/SQLitePersonalRecordRepository');
+      const repo = new SQLitePersonalRecordRepository();
+      await repo.deleteAll();
+      const { BackfillPersonalRecordsUseCase } = await import('@/application/usecases/BackfillPersonalRecordsUseCase');
+      const { SQLiteRunRepository } = await import('@/infrastructure/persistence/SQLiteRunRepository');
+      const backfill = new BackfillPersonalRecordsUseCase(new SQLiteRunRepository());
+      await backfill.execute();
+      await loadRecords();
+    } catch (e) {
+      Alert.alert('Error', 'Failed to recalculate records');
+    }
   };
 
   const latestRecord = records.length > 0 ? records[0] : undefined;
@@ -220,6 +290,8 @@ export const PersonalRecordsScreen: React.FC<Props> = ({ navigation }) => {
           <PersonalRecordItem
             record={item}
             onPress={() => handleRecordPress(item)}
+            onShare={() => handleRecordShare(item)}
+            onDelete={() => handleRecordDelete(item)}
           />
         )}
         keyExtractor={(item) => item.id.value}
@@ -237,8 +309,9 @@ export const PersonalRecordsScreen: React.FC<Props> = ({ navigation }) => {
           records.length > 0 ? (
             <StatsHeader
               totalRecords={records.length}
-              latestRecord={latestRecord}
+              {...(latestRecord ? { latestRecord } : {})}
               onViewAchievements={handleViewAchievements}
+              onRecalculate={handleRecalculate}
             />
           ) : null
         }
@@ -422,5 +495,23 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#FF6B35',
     marginLeft: 8
+  },
+  recalcButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: 8,
+    marginTop: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#FF6B35',
+    backgroundColor: '#fff'
+  },
+  recalcButtonText: {
+    color: '#FF6B35',
+    fontSize: 14,
+    fontWeight: '600'
   }
 });

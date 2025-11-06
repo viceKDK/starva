@@ -11,21 +11,48 @@ export class AchievementDetectionService {
   ) {}
 
   async detectNewAchievements(run: Run): Promise<Result<Achievement[], string>> {
+    const startTime = Date.now();
+
     try {
       const newAchievements: Achievement[] = [];
 
-      // Check all achievement types
-      const distanceAchievements = await this.checkDistanceMilestones(run);
-      const volumeAchievements = await this.checkVolumeAchievements(run);
-      const frequencyAchievements = await this.checkFrequencyAchievements(run);
-      const speedAchievements = await this.checkSpeedAchievements(run);
-      const consistencyAchievements = await this.checkConsistencyAchievements(run);
+      // Performance optimization: Load all data once instead of multiple queries
+      const [allRunsResult, existingAchievementsResult] = await Promise.all([
+        this.runRepository.findAll(),
+        this.achievementRepository.findAll()
+      ]);
+
+      if (!allRunsResult.success) {
+        return { success: false, error: 'Failed to load runs for achievement detection' };
+      }
+
+      if (!existingAchievementsResult.success) {
+        return { success: false, error: 'Failed to load existing achievements' };
+      }
+
+      const allRuns = allRunsResult.data;
+      const existingAchievements = existingAchievementsResult.data;
+
+      // Check all achievement types with cached data
+      const distanceAchievements = await this.checkDistanceMilestones(run, existingAchievements);
+      const volumeAchievements = await this.checkVolumeAchievements(run, allRuns, existingAchievements);
+      const frequencyAchievements = await this.checkFrequencyAchievements(run, allRuns, existingAchievements);
+      const speedAchievements = await this.checkSpeedAchievements(run, existingAchievements);
+      const consistencyAchievements = await this.checkConsistencyAchievements(run, allRuns, existingAchievements);
 
       newAchievements.push(...distanceAchievements);
       newAchievements.push(...volumeAchievements);
       newAchievements.push(...frequencyAchievements);
       newAchievements.push(...speedAchievements);
       newAchievements.push(...consistencyAchievements);
+
+      const endTime = Date.now();
+      const executionTime = endTime - startTime;
+
+      // Log performance for monitoring
+      if (executionTime > 1000) {
+        console.warn(`Achievement detection took ${executionTime}ms - exceeds target of 1s`);
+      }
 
       return { success: true, data: newAchievements };
     } catch (error) {
@@ -34,20 +61,20 @@ export class AchievementDetectionService {
     }
   }
 
-  private async checkDistanceMilestones(run: Run): Promise<Achievement[]> {
+  private checkDistanceMilestones(run: Run, existingAchievements: Achievement[]): Achievement[] {
     const achievements: Achievement[] = [];
     const distanceKm = run.distance / 1000;
     const milestones = [5, 10, 21.1, 42.2];
 
     for (const milestone of milestones) {
       if (distanceKm >= milestone) {
-        // Check if this milestone achievement already exists
-        const existingResult = await this.achievementRepository.findByTypeAndCriteria(
-          'DISTANCE_MILESTONE',
-          { distance: milestone }
+        // Check if this milestone achievement already exists in cached data
+        const hasExisting = existingAchievements.some(
+          achievement => achievement.type === 'DISTANCE_MILESTONE' &&
+                        achievement.criteria?.distance === milestone
         );
 
-        if (existingResult.success && !existingResult.data) {
+        if (!hasExisting) {
           const achievement = Achievement.createDistanceMilestone(
             milestone,
             { value: run.id }
@@ -60,15 +87,10 @@ export class AchievementDetectionService {
     return achievements;
   }
 
-  private async checkVolumeAchievements(run: Run): Promise<Achievement[]> {
+  private checkVolumeAchievements(run: Run, allRuns: Run[], existingAchievements: Achievement[]): Achievement[] {
     const achievements: Achievement[] = [];
-    const allRunsResult = await this.runRepository.findAll();
 
-    if (!allRunsResult.success) {
-      return achievements;
-    }
-
-    const totalDistanceKm = allRunsResult.data.reduce(
+    const totalDistanceKm = allRuns.reduce(
       (sum, r) => sum + (r.distance / 1000),
       0
     );
@@ -77,13 +99,13 @@ export class AchievementDetectionService {
 
     for (const milestone of volumeMilestones) {
       if (totalDistanceKm >= milestone) {
-        // Check if this volume achievement already exists
-        const existingResult = await this.achievementRepository.findByTypeAndCriteria(
-          'VOLUME',
-          { totalDistance: milestone }
+        // Check if this volume achievement already exists in cached data
+        const hasExisting = existingAchievements.some(
+          achievement => achievement.type === 'VOLUME' &&
+                        achievement.criteria?.totalDistance === milestone
         );
 
-        if (existingResult.success && !existingResult.data) {
+        if (!hasExisting) {
           const achievement = Achievement.createVolumeAchievement(
             milestone,
             { value: run.id }
@@ -96,26 +118,21 @@ export class AchievementDetectionService {
     return achievements;
   }
 
-  private async checkFrequencyAchievements(run: Run): Promise<Achievement[]> {
+  private checkFrequencyAchievements(run: Run, allRuns: Run[], existingAchievements: Achievement[]): Achievement[] {
     const achievements: Achievement[] = [];
-    const allRunsResult = await this.runRepository.findAll();
 
-    if (!allRunsResult.success) {
-      return achievements;
-    }
-
-    const totalRuns = allRunsResult.data.length;
+    const totalRuns = allRuns.length;
     const frequencyMilestones = [10, 25, 50, 100];
 
     for (const milestone of frequencyMilestones) {
       if (totalRuns >= milestone) {
-        // Check if this frequency achievement already exists
-        const existingResult = await this.achievementRepository.findByTypeAndCriteria(
-          'FREQUENCY',
-          { totalRuns: milestone }
+        // Check if this frequency achievement already exists in cached data
+        const hasExisting = existingAchievements.some(
+          achievement => achievement.type === 'FREQUENCY' &&
+                        achievement.criteria?.totalRuns === milestone
         );
 
-        if (existingResult.success && !existingResult.data) {
+        if (!hasExisting) {
           const achievement = Achievement.createFrequencyAchievement(
             milestone,
             { value: run.id }
@@ -128,7 +145,7 @@ export class AchievementDetectionService {
     return achievements;
   }
 
-  private async checkSpeedAchievements(run: Run): Promise<Achievement[]> {
+  private checkSpeedAchievements(run: Run, existingAchievements: Achievement[]): Achievement[] {
     const achievements: Achievement[] = [];
     const distanceKm = run.distance / 1000;
 
@@ -141,13 +158,13 @@ export class AchievementDetectionService {
 
     for (const threshold of paceThresholds) {
       if (run.averagePace <= threshold) {
-        // Check if this speed achievement already exists
-        const existingResult = await this.achievementRepository.findByTypeAndCriteria(
-          'SPEED',
-          { pace: threshold }
+        // Check if this speed achievement already exists in cached data
+        const hasExisting = existingAchievements.some(
+          achievement => achievement.type === 'SPEED' &&
+                        achievement.criteria?.pace === threshold
         );
 
-        if (existingResult.success && !existingResult.data) {
+        if (!hasExisting) {
           const achievement = Achievement.createSpeedAchievement(
             threshold,
             { value: run.id }
@@ -160,16 +177,11 @@ export class AchievementDetectionService {
     return achievements;
   }
 
-  private async checkConsistencyAchievements(run: Run): Promise<Achievement[]> {
+  private checkConsistencyAchievements(run: Run, allRuns: Run[], existingAchievements: Achievement[]): Achievement[] {
     const achievements: Achievement[] = [];
-    const allRunsResult = await this.runRepository.findAll();
-
-    if (!allRunsResult.success) {
-      return achievements;
-    }
 
     // Sort runs by date
-    const sortedRuns = allRunsResult.data.sort(
+    const sortedRuns = allRuns.sort(
       (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
     );
 
@@ -179,13 +191,13 @@ export class AchievementDetectionService {
 
     for (const milestone of consistencyMilestones) {
       if (streak >= milestone) {
-        // Check if this consistency achievement already exists
-        const existingResult = await this.achievementRepository.findByTypeAndCriteria(
-          'CONSISTENCY',
-          { consecutiveDays: milestone }
+        // Check if this consistency achievement already exists in cached data
+        const hasExisting = existingAchievements.some(
+          achievement => achievement.type === 'CONSISTENCY' &&
+                        achievement.criteria?.consecutiveDays === milestone
         );
 
-        if (existingResult.success && !existingResult.data) {
+        if (!hasExisting) {
           const achievement = Achievement.createConsistencyAchievement(
             milestone,
             { value: run.id }
@@ -240,18 +252,68 @@ export class AchievementDetectionService {
   }
 
   async saveNewAchievements(achievements: Achievement[]): Promise<Result<void, string>> {
+    if (achievements.length === 0) {
+      return { success: true, data: undefined };
+    }
+
+    const startTime = Date.now();
+
     try {
-      for (const achievement of achievements) {
-        const saveResult = await this.achievementRepository.save(achievement);
+      // Check if repository supports batch operations
+      if (this.achievementRepository.saveMany) {
+        // Use batch save for better performance
+        const saveResult = await this.achievementRepository.saveMany(achievements);
         if (!saveResult.success) {
-          console.error(`Failed to save achievement ${achievement.title}:`, saveResult.error);
+          console.error('Failed to batch save achievements:', saveResult.error);
           return saveResult;
         }
+      } else {
+        // Fallback to sequential saves
+        for (const achievement of achievements) {
+          const saveResult = await this.achievementRepository.save(achievement);
+          if (!saveResult.success) {
+            console.error(`Failed to save achievement ${achievement.title}:`, saveResult.error);
+            return saveResult;
+          }
+        }
       }
+
+      const endTime = Date.now();
+      const executionTime = endTime - startTime;
+
+      console.log(`Saved ${achievements.length} new achievements in ${executionTime}ms`);
+
       return { success: true, data: undefined };
     } catch (error) {
       console.error('Error saving achievements:', error);
       return { success: false, error: `Failed to save achievements: ${error}` };
+    }
+  }
+
+  /**
+   * Performance monitoring helper
+   */
+  async getPerformanceMetrics(): Promise<{
+    totalAchievements: number;
+    totalRuns: number;
+    lastDetectionTime?: number;
+  }> {
+    try {
+      const [achievementsResult, runsResult] = await Promise.all([
+        this.achievementRepository.findAll(),
+        this.runRepository.findAll()
+      ]);
+
+      return {
+        totalAchievements: achievementsResult.success ? achievementsResult.data.length : 0,
+        totalRuns: runsResult.success ? runsResult.data.length : 0
+      };
+    } catch (error) {
+      console.error('Error getting performance metrics:', error);
+      return {
+        totalAchievements: 0,
+        totalRuns: 0
+      };
     }
   }
 }

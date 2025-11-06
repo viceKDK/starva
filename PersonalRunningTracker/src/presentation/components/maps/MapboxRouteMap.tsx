@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
 import { GPSPoint } from '@/domain/entities';
 import { StaticMapboxImage } from './StaticMapboxImage';
 import { MapboxConfig, hasMapboxToken } from '@/shared/config/MapboxConfig';
 import { GeoUtils } from '@/shared/utils/GeoUtils';
+import { RouteSimplificationService } from '@/infrastructure/maps/RouteSimplificationService';
 
 type Props = {
   points: GPSPoint[];
@@ -13,8 +14,16 @@ type Props = {
 export const MapboxRouteMap: React.FC<Props> = ({ points, height = 220 }) => {
   const width = Dimensions.get('window').width - 32;
 
+  // Simplify route for better performance
+  const simplifiedPoints = useMemo(() => {
+    if (!points || points.length === 0) return [];
+
+    const config = RouteSimplificationService.getOptimalConfig(points);
+    return RouteSimplificationService.simplifyRoute(points, config);
+  }, [points]);
+
   // Fallback to static image if no token or not enough points
-  if (!hasMapboxToken() || points.length === 0) {
+  if (!hasMapboxToken() || simplifiedPoints.length === 0) {
     return (
       <StaticMapboxImage points={points} width={width} height={height} />
     );
@@ -23,7 +32,6 @@ export const MapboxRouteMap: React.FC<Props> = ({ points, height = 220 }) => {
   let MapboxGL: any = null;
   try {
     // Dynamically require to avoid bundling errors if package not installed yet
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     MapboxGL = require('@rnmapbox/maps');
   } catch (e) {
     return <StaticMapboxImage points={points} width={width} height={height} />;
@@ -39,8 +47,8 @@ export const MapboxRouteMap: React.FC<Props> = ({ points, height = 220 }) => {
 
   // No token needed when using MapLibre + public styles
 
-  const coords = points.map(p => [p.longitude, p.latitude]);
-  const bbox = GeoUtils.calculateBoundingBox(points, 0.15);
+  const coords = simplifiedPoints.map(p => [p.longitude, p.latitude]);
+  const bbox = GeoUtils.calculateBoundingBox(simplifiedPoints, 0.15);
 
   const lineGeoJSON = {
     type: 'Feature',

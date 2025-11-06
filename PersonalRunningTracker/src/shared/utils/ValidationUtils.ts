@@ -252,15 +252,21 @@ export class ValidationUtils {
     warnings.push(...latResult.warnings);
     warnings.push(...lonResult.warnings);
 
-    return {
+    const base = {
       isValid: errors.length === 0,
       errors,
       warnings,
-      data: latResult.data && lonResult.data ? {
-        latitude: latResult.data,
-        longitude: lonResult.data
-      } : undefined
     };
+    if (latResult.data !== undefined && lonResult.data !== undefined) {
+      return {
+        ...base,
+        data: {
+          latitude: latResult.data,
+          longitude: lonResult.data
+        }
+      };
+    }
+    return base;
   }
 
   /**
@@ -310,20 +316,24 @@ export class ValidationUtils {
       }
     }
 
-    const data: GPSPoint | undefined = (coordsResult.data && timestampResult.data) ? {
-      latitude: coordsResult.data.latitude,
-      longitude: coordsResult.data.longitude,
-      timestamp: timestampResult.data,
-      accuracy: point.accuracy,
-      altitude: point.altitude
-    } : undefined;
-
-    return {
+    const base = {
       isValid: errors.length === 0,
       errors,
       warnings,
-      data
     };
+    if (coordsResult.data && timestampResult.data) {
+      return {
+        ...base,
+        data: {
+          latitude: coordsResult.data.latitude,
+          longitude: coordsResult.data.longitude,
+          timestamp: timestampResult.data,
+          accuracy: point.accuracy,
+          altitude: point.altitude
+        }
+      };
+    }
+    return base;
   }
 
   /**

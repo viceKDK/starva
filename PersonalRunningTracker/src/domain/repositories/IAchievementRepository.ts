@@ -3,6 +3,7 @@ import { Result } from '@/shared/types';
 
 export interface IAchievementRepository {
   save(achievement: Achievement): Promise<Result<void, string>>;
+  saveMany(achievements: Achievement[]): Promise<Result<void, string>>;
   findById(id: AchievementId): Promise<Result<Achievement | null, string>>;
   findByType(type: AchievementType): Promise<Result<Achievement[], string>>;
   findByTypeAndCriteria(type: AchievementType, criteria: AchievementCriteria): Promise<Result<Achievement | null, string>>;

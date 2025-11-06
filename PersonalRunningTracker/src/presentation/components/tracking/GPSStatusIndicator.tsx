@@ -96,7 +96,7 @@ export const GPSStatusIndicator: React.FC<GPSStatusIndicatorProps> = ({
               ? 'Using Apple Core Location - Waiting for first fix'
               : 'Using Google Fused Location - Waiting for first fix'}
           </Text>
-          <Text style={styles.hintText}>Move to open sky if this takes > 10s</Text>
+          <Text style={styles.hintText}>Move to open sky if this takes {'>'} 10s</Text>
         </View>
       )}
 

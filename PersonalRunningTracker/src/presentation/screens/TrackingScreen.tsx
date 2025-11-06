@@ -18,6 +18,7 @@ import {
   MetricsDisplay,
   GPSStatusIndicator
 } from '../components/tracking';
+import { LiveTrackingMap } from '../components/maps/LiveTrackingMap';
 import {
   StartRunTrackingUseCase,
   PauseRunTrackingUseCase,
@@ -213,10 +214,10 @@ const TrackingContent: React.FC<{ navigation: Props['navigation']; deps: Deps }>
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar
-        barStyle="light-content"
-        backgroundColor="#FF6B35"
+        barStyle="dark-content"
+        backgroundColor="#ffffff"
       />
 
       <ScrollView
@@ -224,19 +225,39 @@ const TrackingContent: React.FC<{ navigation: Props['navigation']; deps: Deps }>
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         scrollEnabled={true}
+        bounces={true}
       >
         {/* GPS Status */}
-        <GPSStatusIndicator
-          status={controller.gpsStatus}
-          accuracy={controller.gpsAccuracy}
-          error={controller.error}
-        />
+        <View style={styles.statusBarContainer}>
+          <GPSStatusIndicator
+            status={controller.gpsStatus}
+            accuracy={controller.gpsAccuracy}
+            error={controller.error}
+          />
+        </View>
 
         {/* Metrics Display */}
         <MetricsDisplay
           metrics={controller.metrics}
           isTracking={controller.sessionState === RunSessionState.TRACKING}
         />
+
+        {/* Live Tracking Map */}
+        {controller.trackingPoints.length > 0 ? (
+          <View style={styles.mapContainer}>
+            <LiveTrackingMap
+              points={controller.trackingPoints}
+              currentLocation={controller.currentLocation}
+              height={280}
+              showCurrentLocation={true}
+              isTracking={controller.sessionState === RunSessionState.TRACKING}
+            />
+          </View>
+        ) : (
+          <View style={styles.emptyMapContainer}>
+            <Text style={styles.emptyMapText}>Start tracking to see your route</Text>
+          </View>
+        )}
 
         {/* Error Display */}
         {controller.error && (
@@ -248,10 +269,13 @@ const TrackingContent: React.FC<{ navigation: Props['navigation']; deps: Deps }>
         {/* Session Status Message */}
         {controller.sessionState === RunSessionState.PAUSED && (
           <View style={styles.statusContainer}>
-            <Text style={styles.statusText}>Run Paused</Text>
+            <Text style={styles.statusText}>⏸️ Run Paused</Text>
             <Text style={styles.statusSubtext}>Tap Resume to continue tracking</Text>
           </View>
         )}
+
+        {/* Extra padding for bottom controls */}
+        <View style={{ height: 100 }} />
       </ScrollView>
 
       {/* Control Buttons */}
@@ -272,61 +296,111 @@ const TrackingContent: React.FC<{ navigation: Props['navigation']; deps: Deps }>
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff'
+    backgroundColor: '#fafafa'
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20
+    padding: 20,
+    backgroundColor: '#fafafa'
   },
   loadingText: {
     fontSize: 16,
     color: '#666',
-    textAlign: 'center'
+    textAlign: 'center',
+    marginTop: 16,
+    fontWeight: '500'
   },
   scrollView: {
     flex: 1
   },
   scrollContent: {
     flexGrow: 1,
-    paddingTop: 20
+    paddingBottom: 20
+  },
+  statusBarContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 8
+  },
+  mapContainer: {
+    marginTop: 8,
+    marginBottom: 16
+  },
+  emptyMapContainer: {
+    height: 280,
+    marginHorizontal: 16,
+    marginTop: 8,
+    marginBottom: 16,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#e0e0e0',
+    borderStyle: 'dashed'
+  },
+  emptyMapText: {
+    fontSize: 15,
+    color: '#999',
+    fontWeight: '500'
   },
   controlsContainer: {
     backgroundColor: '#ffffff',
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
-    paddingBottom: 10
+    borderTopColor: '#e5e5e5',
+    paddingBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 8
   },
   errorContainer: {
-    margin: 20,
-    padding: 16,
+    marginHorizontal: 20,
+    marginVertical: 12,
+    padding: 18,
     backgroundColor: '#ffebee',
-    borderRadius: 8,
-    borderLeftWidth: 4,
-    borderLeftColor: '#F44336'
+    borderRadius: 16,
+    borderLeftWidth: 5,
+    borderLeftColor: '#F44336',
+    shadowColor: '#F44336',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3
   },
   errorText: {
     color: '#F44336',
     fontSize: 14,
-    textAlign: 'center'
+    textAlign: 'center',
+    fontWeight: '600'
   },
   statusContainer: {
-    margin: 20,
-    padding: 16,
+    marginHorizontal: 20,
+    marginVertical: 12,
+    padding: 20,
     backgroundColor: '#fff3e0',
-    borderRadius: 8,
-    alignItems: 'center'
+    borderRadius: 16,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#FFB74D',
+    shadowColor: '#FF9800',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 3
   },
   statusText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#FF9800',
-    marginBottom: 4
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#F57C00',
+    marginBottom: 6
   },
   statusSubtext: {
     fontSize: 14,
     color: '#666',
-    textAlign: 'center'
+    textAlign: 'center',
+    fontWeight: '500'
   }
 });
