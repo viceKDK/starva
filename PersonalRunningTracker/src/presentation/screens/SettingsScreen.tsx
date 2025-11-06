@@ -19,6 +19,7 @@ import { UserPreferencesEntity, DistanceUnit, PaceFormat, GPSAccuracy } from '@/
 import { GetUserPreferencesUseCase, UpdateUserPreferencesUseCase, ResetUserPreferencesUseCase, DataIntegrityCheckUseCase } from '@/application/usecases';
 import { AsyncStorageUserPreferencesRepository } from '@/infrastructure/storage/AsyncStorageUserPreferencesRepository';
 import { SQLiteRunRepository } from '@/infrastructure/persistence';
+import { seedAllTestRuns, seedSingleRun, clearAllRuns, TEST_RUNS } from '@/infrastructure/persistence/seedTestData';
 
 type SettingsScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Settings'>;
 
@@ -292,6 +293,92 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
+  // Developer Tools
+  const handleSeedAllTestRuns = async () => {
+    Alert.alert(
+      'Insertar Datos de Prueba',
+      '¿Quieres insertar 5 carreras de prueba en la base de datos?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Insertar',
+          onPress: async () => {
+            setIsSaving(true);
+            try {
+              await seedAllTestRuns();
+              Alert.alert('Éxito', '5 carreras de prueba insertadas correctamente');
+            } catch (error) {
+              console.error('Error seeding test runs:', error);
+              Alert.alert('Error', 'No se pudieron insertar los datos de prueba');
+            } finally {
+              setIsSaving(false);
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  const handleSeedSingleRun = () => {
+    const options = Object.keys(TEST_RUNS).map(key => {
+      const run = TEST_RUNS[key as keyof typeof TEST_RUNS];
+      return {
+        key,
+        title: run.name,
+        subtitle: `${(run.distance / 1000).toFixed(1)}km - ${Math.floor(run.duration / 60)}min`
+      };
+    });
+
+    Alert.alert(
+      'Selecciona una Carrera',
+      'Elige qué carrera de prueba quieres insertar:',
+      [
+        ...options.map(opt => ({
+          text: `${opt.title} (${opt.subtitle})`,
+          onPress: async () => {
+            setIsSaving(true);
+            try {
+              await seedSingleRun(opt.key as keyof typeof TEST_RUNS);
+              Alert.alert('Éxito', `Carrera "${opt.title}" insertada correctamente`);
+            } catch (error) {
+              console.error('Error seeding run:', error);
+              Alert.alert('Error', 'No se pudo insertar la carrera');
+            } finally {
+              setIsSaving(false);
+            }
+          }
+        })),
+        { text: 'Cancelar', style: 'cancel' }
+      ]
+    );
+  };
+
+  const handleClearAllRuns = () => {
+    Alert.alert(
+      '⚠️ Eliminar Todas las Carreras',
+      '¿Estás seguro? Esta acción eliminará TODAS las carreras de la base de datos y no se puede deshacer.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Eliminar Todo',
+          style: 'destructive',
+          onPress: async () => {
+            setIsSaving(true);
+            try {
+              await clearAllRuns();
+              Alert.alert('Éxito', 'Todas las carreras han sido eliminadas');
+            } catch (error) {
+              console.error('Error clearing runs:', error);
+              Alert.alert('Error', 'No se pudieron eliminar las carreras');
+            } finally {
+              setIsSaving(false);
+            }
+          }
+        }
+      ]
+    );
+  };
+
   const getDistanceUnitLabel = (unit: DistanceUnit): string => {
     return unit === 'km' ? 'Kilometers' : 'Miles';
   };
@@ -439,6 +526,30 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
             subtitle="Validate and fix run data quality"
             icon="shield-checkmark-outline"
             onPress={handleDataIntegrityCheck}
+            disabled={isSaving}
+          />
+        </SettingSection>
+
+        <SettingSection title="🛠️ Developer Tools">
+          <SettingRow
+            title="Insertar 5 Carreras de Prueba"
+            subtitle="Agrega datos de ejemplo del 25/9 a hoy"
+            icon="add-circle-outline"
+            onPress={handleSeedAllTestRuns}
+            disabled={isSaving}
+          />
+          <SettingRow
+            title="Insertar Carrera Individual"
+            subtitle="Selecciona una carrera específica"
+            icon="add-outline"
+            onPress={handleSeedSingleRun}
+            disabled={isSaving}
+          />
+          <SettingRow
+            title="⚠️ Eliminar Todas las Carreras"
+            subtitle="Borra todos los datos (sin deshacer)"
+            icon="trash-outline"
+            onPress={handleClearAllRuns}
             disabled={isSaving}
           />
         </SettingSection>

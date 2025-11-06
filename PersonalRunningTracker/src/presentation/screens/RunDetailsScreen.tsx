@@ -118,7 +118,7 @@ const MetricsGrid: React.FC<MetricsGridProps> = ({ run }) => {
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  const estimateCalories = (distanceKm: number, durationMinutes: number): number => {
+  const estimateCalories = (distanceKm: number): number => {
     // Simple estimation: ~60 calories per km for average runner
     return Math.round(distanceKm * 60);
   };
@@ -141,7 +141,7 @@ const MetricsGrid: React.FC<MetricsGridProps> = ({ run }) => {
     },
     {
       label: 'Calories',
-      value: `${estimateCalories(run.distance / 1000, run.duration / 60)}`,
+      value: `${estimateCalories(run.distance / 1000)}`,
       icon: 'flame-outline'
     }
   ];
@@ -167,10 +167,26 @@ interface RouteMapProps {
 }
 
 const RouteMap: React.FC<RouteMapProps> = ({ gpsPoints }) => {
+  // Debug: log GPS points info
+  console.log('🗺️ RouteMap - GPS Points:', gpsPoints.length);
+  
+  if (gpsPoints.length === 0) {
+    return (
+      <View style={styles.mapContainer}>
+        <Text style={styles.sectionTitle}>Mapa del Recorrido</Text>
+        <View style={styles.noMapContainer}>
+          <Ionicons name="map-outline" size={48} color="#ccc" />
+          <Text style={styles.noMapText}>No hay datos de GPS disponibles</Text>
+          <Text style={styles.noMapSubtext}>Esta carrera no tiene puntos de ruta guardados</Text>
+        </View>
+      </View>
+    );
+  }
+  
   return (
     <View style={styles.mapContainer}>
       <Text style={styles.sectionTitle}>Mapa del Recorrido</Text>
-      <CurrentRouteMap points={gpsPoints} enableAnimation={true} />
+      <CurrentRouteMap points={gpsPoints} />
 
       <View style={styles.mapStats}>
         <View style={styles.mapStat}>
@@ -231,12 +247,18 @@ const PaceAnalysis: React.FC<PaceAnalysisProps> = ({ run }) => {
     let kmStartIndex = 0;
 
     for (let i = 1; i < points.length; i++) {
-      const distance = calculateDistance(points[i - 1], points[i]);
+      const prevPoint = points[i - 1];
+      const currPoint = points[i];
+      const startPoint = points[kmStartIndex];
+      
+      if (!prevPoint || !currPoint || !startPoint) continue;
+      
+      const distance = calculateDistance(prevPoint, currPoint);
       totalDistance += distance;
 
       if (totalDistance >= currentKm * 1000 || i === points.length - 1) {
-        const startTime = points[kmStartIndex].timestamp.getTime();
-        const endTime = points[i].timestamp.getTime();
+        const startTime = startPoint.timestamp.getTime();
+        const endTime = currPoint.timestamp.getTime();
         const splitTime = (endTime - startTime) / 1000;
         const splitDistance = Math.min(totalDistance - (currentKm - 1) * 1000, 1000);
         const pace = splitTime / (splitDistance / 1000);
@@ -380,7 +402,7 @@ export const RunDetailsScreen: React.FC<Props> = ({ route, navigation }) => {
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Save',
-          onPress: async (newName) => {
+          onPress: async (newName?: string) => {
             if (newName && newName.trim()) {
               try {
                 const result = await updateRunUseCase.execute(runId, { name: newName.trim() });
@@ -658,6 +680,13 @@ const styles = StyleSheet.create({
   map: {
     flex: 1
   },
+  noMapContainer: {
+    height: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa',
+    borderRadius: 12
+  },
   noMapData: {
     height: 200,
     justifyContent: 'center',
@@ -669,6 +698,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666',
     marginTop: 12
+  },
+  noMapSubtext: {
+    fontSize: 14,
+    color: '#999',
+    marginTop: 8,
+    textAlign: 'center'
   },
   mapStats: {
     flexDirection: 'row',
